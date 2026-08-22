@@ -162,12 +162,13 @@ button{background:none;border:0;cursor:pointer}
 #ink .disc{stroke:#F3E8CF;stroke-width:1.6;paint-order:stroke fill}
 #ink .glyph{fill:none;stroke:#FBF3E1;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 /* Écriture à la main : on n'écrit pas au plomb sur une carte de 1899. */
-#ink .lbl{font-family:var(--hand);font-size:18px;font-weight:700;letter-spacing:.005em;
-  stroke:#F2E6CC;stroke-width:3.6px;stroke-linejoin:round;paint-order:stroke fill}
-#ink .free{font-family:var(--hand);font-size:27px;font-weight:600;letter-spacing:.005em;
-  stroke:#F2E6CC;stroke-width:4.4px;stroke-linejoin:round;paint-order:stroke fill}
-#ink .zname{font-family:var(--hand);font-size:17px;font-weight:700;text-anchor:middle;
-  stroke:#F2E6CC;stroke-width:3.4px;stroke-linejoin:round;paint-order:stroke fill}
+#ink .lbl,#ink .free,#ink .zname{font-family:var(--hand);
+  /* Pas de contour : l'encre n'en a pas. Le mélange par transparence
+     la fait pénétrer le papier au lieu de flotter au-dessus. */
+  mix-blend-mode:multiply;paint-order:normal}
+#ink .lbl{font-size:18px;font-weight:700;letter-spacing:.005em}
+#ink .free{font-size:27px;font-weight:600;letter-spacing:.005em}
+#ink .zname{font-size:17px;font-weight:700;text-anchor:middle}
 /* Le tracé tremble légèrement, comme une plume sur du papier. Le texte
    en est exempt : la police est déjà manuscrite, la déformer le rendrait
    illisible. */
@@ -1412,9 +1413,9 @@ function exportPNG(){
    +".zone{stroke-linejoin:round}"
    +".disc{stroke:#F3E8CF;stroke-width:1.6}"
    +".glyph{fill:none;stroke:#FBF3E1;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}"
-   +".lbl{font-family:Georgia,serif;font-size:13px;font-weight:700;stroke:#F2E6CC;stroke-width:3.4;stroke-linejoin:round;paint-order:stroke fill}"
-   +".free{font-family:Georgia,serif;font-size:19px;stroke:#F2E6CC;stroke-width:3.8;stroke-linejoin:round;paint-order:stroke fill}"
-   +".zname{font-family:Georgia,serif;font-size:12px;font-weight:700;text-anchor:middle;stroke:#F2E6CC;stroke-width:3;stroke-linejoin:round;paint-order:stroke fill}"
+   +".lbl{font-family:"Segoe Script","Bradley Hand","Lucida Handwriting",cursive;font-size:18px;font-weight:700}"
+   +".free{font-family:"Segoe Script","Bradley Hand","Lucida Handwriting",cursive;font-size:27px}"
+   +".zname{font-family:"Segoe Script","Bradley Hand","Lucida Handwriting",cursive;font-size:17px;font-weight:700;text-anchor:middle}"
    +".mk{transform-box:view-box;transform-origin:0 0}"
    +"</style>"+marks+"</svg>";
 
