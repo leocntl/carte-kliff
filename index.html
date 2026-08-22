@@ -192,7 +192,10 @@ button{background:none;border:0;cursor:pointer}
   /* Pas de contour : l'encre n'en a pas. Le mélange par transparence
      la fait pénétrer le papier au lieu de flotter au-dessus. */
   mix-blend-mode:multiply;paint-order:normal}
-#ink .lbl{font-size:18px;font-weight:700;letter-spacing:.005em}
+/* Les noms de repères s'effacent sous 100 % : à faible zoom ils se
+   chevauchent et noient la carte. Les noms de zones, eux, restent. */
+#ink .lbl{font-size:18px;font-weight:700;letter-spacing:.005em;
+  transition:opacity .16s ease-out}
 #ink .free{font-size:27px;font-weight:600;letter-spacing:.005em}
 #ink .zname{font-size:17px;font-weight:700;text-anchor:middle}
 /* Le tracé tremble légèrement, comme une plume sur du papier. Le texte
@@ -614,7 +617,8 @@ function paint(){
    +"transform:translate("+Math.round(view.x)+"px,"+Math.round(view.y)+"px)}"
    +"#ink,#gridg{--iz:"+(1/view.z).toFixed(5)+"}"
    +"#gridsvg{opacity:"+(showGrid?1:0)+"}"
-   +".map{image-rendering:"+(sharp?"pixelated":"auto")+"}";
+   +".map{image-rendering:"+(sharp?"pixelated":"auto")+"}"
+   +(view.z<=1?"#ink .lbl{opacity:0;pointer-events:none}":"");
   for(var k in hidden) if(hidden[k]) s+='#ink .an[data-f="'+k+'"]{display:none}';
   vstyle.textContent=s;
   var zv=hud.querySelector(".zv"); if(zv)zv.textContent=Math.round(view.z*100)+"%";
