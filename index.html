@@ -389,6 +389,32 @@ button{background:none;border:0;cursor:pointer}
 .fhl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--faint);margin-bottom:3px}
 .fhr{font-size:11.5px;color:var(--dim)}
+
+/* ── Avis de recherche ────────────────────────── */
+.cnt{font-style:normal;font-size:10.5px;font-weight:700;min-width:17px;height:17px;
+  padding:0 4px;border-radius:100px;display:inline-grid;place-items:center;
+  background:#B3332B;color:#fff;margin-left:1px}
+.wtop{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.wgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fl select{width:100%;padding:8px 10px;background:var(--ground2);
+  border:1px solid var(--line);border-radius:var(--r);font-family:var(--sans);
+  font-size:14px;letter-spacing:normal;text-transform:none;color:var(--ink)}
+.fl select:focus{border-color:var(--brassd);outline:none}
+.wlist{display:flex;flex-direction:column;gap:2px;max-height:330px;overflow-y:auto;
+  margin:0 -4px;scrollbar-width:thin}
+.wrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:11px;
+  padding:9px 6px;border-radius:2px;cursor:pointer}
+.wrow:hover{background:rgba(255,255,255,.045)}
+.wst{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#fff;
+  padding:3px 8px;border-radius:100px;white-space:nowrap}
+.wrow .tx{min-width:0}
+.wrow .t1{display:block;font-size:13.5px;font-weight:500;color:var(--ink)}
+.wrow .t2{display:block;font-size:11.5px;color:var(--faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrow .t2 b{font-family:var(--mono);font-weight:400;color:var(--brass)}
+.wrow .x{opacity:0;color:var(--faint);padding:2px 5px;font-size:15px;line-height:1}
+.wrow:hover .x{opacity:1}
+.wrow .x:hover{color:var(--blood)}
 .note code{font-family:var(--mono);color:var(--dim);font-size:11.5px}
 
 /* ── Toast ────────────────────────────────────── */
@@ -618,12 +644,16 @@ function cloudPull(){
     .then(function(r){ if(!r.ok)throw 0; return r.json() })
     .then(function(d){
       d=d||{};
-      var list=[], nl=[], k;
-      for(k in (d.anns||{}))  if(d.anns[k])  list.push(d.anns[k]);
-      for(k in (d.notes||{})) if(d.notes[k]) nl.push(d.notes[k]);
+      var list=[], nl=[], wl=[], k;
+      for(k in (d.anns||{}))   if(d.anns[k])   list.push(d.anns[k]);
+      for(k in (d.notes||{}))  if(d.notes[k])  nl.push(d.notes[k]);
+      for(k in (d.wanted||{})) if(d.wanted[k]) wl.push(d.wanted[k]);
       list.sort(function(a,b){ return (a.t||0)-(b.t||0) });
       nl.sort(function(a,b){ return (a.t||0)-(b.t||0) });
+      wl.sort(function(a,b){ return (b.t||0)-(a.t||0) });
+      wanted=wl;
       renderAll(list,nl);
+      renderBar();
       cloudOk=true; updateStatus();
     })
     .catch(function(){ cloudOk=false; updateStatus() });
@@ -945,6 +975,10 @@ function renderBar(){
    +'<button class="btn pri" id="bSave" hidden>'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span class="lb">Enregistrer</span></button>'
+   +'<button class="btn" id="bWanted" title="Avis de recherche">'
+   +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+   +'<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9 8h6M9 11h4"/></svg>Avis'
+   +(nbRecherches()?'<i class="cnt">'+nbRecherches()+'</i>':'')+'</button>'
    +'<button class="btn" id="bMenu">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M12 4v11M8 11l4 4 4-4M4 19h16"/></svg>Partage</button>'
@@ -954,6 +988,7 @@ function renderBar(){
 
   $("who").addEventListener("input",function(){ me=this.value.trim(); pref("me",me) });
   $("bSave").addEventListener("click",save);
+  $("bWanted").addEventListener("click",wantedListDialog);
   $("bMenu").addEventListener("click",function(){ shareMenu(this) });
   $("maps").addEventListener("click",function(e){
     var b=e.target.closest("button[data-map]"); if(b)setMap(b.dataset.map);
@@ -1527,6 +1562,96 @@ function sheetDialog(id){
     if(d2!==(a.desc||""))  kv.desc=d2;
     v.remove();
     if(Object.keys(kv).length){ setAttrs(id,kv); toast("Fiche enregistrée","ok") }
+  };
+}
+
+/* ══ Avis de recherche ═══════════════════════════════════════
+   Une collection à part des annotations : un avis concerne une
+   personne, pas un point de la carte.                          */
+var wanted=[];
+var WSTATUS={
+  recherche:{n:"Recherché", c:"#B3332B"},
+  capture  :{n:"Capturé",   c:"#1B4B7A"},
+  abattu   :{n:"Abattu",    c:"#3D3428"},
+  gracie   :{n:"Gracié",    c:"#2D6A4F"}
+};
+function wantedAt(id){ for(var i=0;i<wanted.length;i++) if(wanted[i].id===id) return wanted[i]; return null }
+function nbRecherches(){ var n=0; wanted.forEach(function(w){ if(!w.del&&(w.st||"recherche")==="recherche")n++ }); return n }
+
+function saveWanted(w){
+  var i,f=false;
+  for(i=0;i<wanted.length;i++) if(wanted[i].id===w.id){ wanted[i]=w; f=true }
+  if(!f) wanted.unshift(w);
+  cloudPut("/wanted/"+w.id,w);
+  renderBar();
+}
+
+function wantedListDialog(){
+  var live=wanted.filter(function(w){return !w.del});
+  var body='<div class="wtop"><p>'+(live.length?live.length+" avis au registre.":"Aucun avis pour l’instant.")
+    +'</p><button class="btn pri" data-new>Nouvel avis</button></div>';
+  if(live.length){
+    body+='<div class="wlist">';
+    live.forEach(function(w){
+      var S=WSTATUS[w.st||"recherche"]||WSTATUS.recherche;
+      body+='<div class="wrow" data-open="'+esc(w.id)+'">'
+        +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
+        +'<span class="tx"><span class="t1">'+esc(w.name||"Sans nom")+"</span>"
+        +'<span class="t2">'+(w.grp?esc(w.grp)+" · ":"")+esc(w.crime||"motif non précisé")
+        +(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")+"</span></span>"
+        +'<button class="x" data-del="'+esc(w.id)+'" title="Retirer" aria-label="Retirer">×</button></div>';
+    });
+    body+="</div>";
+  }
+  var v=dialog("Avis de recherche",body,'<button class="btn pri" data-x>Fermer</button>');
+  v.querySelector("[data-x]").onclick=function(){ v.remove() };
+  v.addEventListener("click",function(e){
+    if(e.target.closest("[data-new]")){ v.remove(); wantedSheet(null); return }
+    var d=e.target.closest("[data-del]");
+    if(d){ e.stopPropagation();
+      var w=wantedAt(d.dataset.del);
+      if(w){ w.del=Date.now(); w.delBy=me||""; saveWanted(w) }
+      v.remove(); wantedListDialog(); return }
+    var o=e.target.closest("[data-open]");
+    if(o){ v.remove(); wantedSheet(o.dataset.open) }
+  });
+}
+
+function wantedSheet(id){
+  var w=id?wantedAt(id):null;
+  var neuf=!w;
+  if(neuf) w={id:nid(),name:"",grp:"",crime:"",bounty:"",seen:"",desc:"",st:"recherche",by:me||"",t:Date.now()};
+  var opts="";
+  for(var k in WSTATUS) opts+='<option value="'+k+'"'+((w.st||"recherche")===k?" selected":"")+">"+WSTATUS[k].n+"</option>";
+  var body=""
+   +'<label class="fl">Nom<input type="text" id="wName" maxlength="80" value="'+esc(w.name||"")+'"></label>'
+   +'<div class="wgrid">'
+   +'<label class="fl">Appartenance<input type="text" id="wGrp" maxlength="60" placeholder="bande, famille…" value="'+esc(w.grp||"")+'"></label>'
+   +'<label class="fl">État<select id="wSt">'+opts+"</select></label></div>"
+   +'<div class="wgrid">'
+   +'<label class="fl">Chef d’accusation<input type="text" id="wCrime" maxlength="90" placeholder="vol de bétail, meurtre…" value="'+esc(w.crime||"")+'"></label>'
+   +'<label class="fl">Prime<input type="text" id="wBounty" maxlength="30" placeholder="50 $" value="'+esc(w.bounty||"")+'"></label></div>'
+   +'<label class="fl">Vu pour la dernière fois<input type="text" id="wSeen" maxlength="90" placeholder="Valentine, case E-9…" value="'+esc(w.seen||"")+'"></label>'
+   +'<label class="fl">Signalement<textarea id="wDesc" class="fdesc" maxlength="2000" placeholder="Apparence, monture, habitudes, complices…">'+esc(w.desc||"")+"</textarea></label>";
+  if(!neuf && w.by) body+='<div class="fhist"><span class="fhr">Ouvert par '+esc(w.by)+" · "+fmtAgo(w.t)+"</span></div>";
+
+  var v=dialog(neuf?"Nouvel avis de recherche":"Avis de recherche",body,
+    '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
+  v.querySelector("#wName").focus();
+  v.querySelector("[data-x]").onclick=function(){ v.remove(); wantedListDialog() };
+  v.querySelector("[data-o]").onclick=function(){
+    var nom=v.querySelector("#wName").value.trim();
+    if(!nom){ toast("Il faut au moins un nom","bad"); return }
+    w.name=nom;
+    w.grp   =v.querySelector("#wGrp").value.trim();
+    w.st    =v.querySelector("#wSt").value;
+    w.crime =v.querySelector("#wCrime").value.trim();
+    w.bounty=v.querySelector("#wBounty").value.trim();
+    w.seen  =v.querySelector("#wSeen").value.trim();
+    w.desc  =v.querySelector("#wDesc").value.trim();
+    saveWanted(w);
+    v.remove(); wantedListDialog();
+    toast(neuf?"Avis ouvert":"Avis mis à jour","ok");
   };
 }
 
