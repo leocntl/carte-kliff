@@ -81,10 +81,29 @@ button{background:none;border:0;cursor:pointer}
 .who input:focus{border-color:var(--brassd);outline:none}
 
 .chip{
-  display:inline-flex;align-items:center;gap:6px;
+  display:inline-flex;align-items:center;gap:6px;position:relative;
   padding:4px 9px;border:1px solid var(--line);border-radius:100px;
   font-size:11px;letter-spacing:.06em;color:var(--dim);white-space:nowrap;
 }
+.chip[data-pop]{cursor:default}
+.chip .nb{font-family:var(--mono);font-weight:700;font-size:12.5px;color:var(--ink)}
+.chip .nb:empty{display:none}
+.chip .pop{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:40;
+  min-width:172px;max-width:262px;padding:3px 0 6px;
+  background:var(--grain),linear-gradient(180deg,#212124,#161618);
+  border:1px solid #000;border-radius:var(--r);
+  box-shadow:inset 0 1px 0 var(--lit),0 14px 34px rgba(0,0,0,.72);
+  white-space:normal;letter-spacing:normal;cursor:default;
+}
+.chip[data-pop]:hover .pop,.chip[data-pop]:focus-within .pop{display:block}
+.chip .ph{display:block;padding:7px 12px 6px;font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint)}
+.chip .pl{display:flex;align-items:center;gap:8px;padding:3px 12px;
+  font-size:12.5px;color:var(--ink);overflow-wrap:anywhere}
+.chip .pl i{width:5px;height:5px;flex:0 0 5px;border-radius:50%;
+  background:#5FA35A;box-shadow:0 0 5px #5FA35A}
+.chip .pl b{font-weight:400;font-size:11.5px;color:var(--faint)}
 .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex:0 0 6px}
 .chip.live .dot{background:#5FA35A;box-shadow:0 0 6px #5FA35A}
 .chip.dirty .dot{background:var(--brass);box-shadow:0 0 6px var(--brass)}
@@ -493,18 +512,20 @@ button{background:none;border:0;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* ── Étroit ───────────────────────────────────── */
-@media (max-width:1500px){ .brand .sub{display:none} }
-@media (max-width:1420px){
+/* La barre de titre est pleine : quand la fenêtre se resserre elle se
+   déleste par paliers, du plus décoratif au plus utile, plutôt que de
+   rogner le titre en silence. Seuils mesurés, compteur à deux chiffres. */
+@media (max-width:1565px){ .brand .sub{display:none} }
+@media (max-width:1470px){
   .bar .lb2,.bar .lb{display:none}
   .bar{gap:12px}
 }
-@media (max-width:1200px){ .bar .chip .tt,.who label{display:none} }
-@media (max-width:1030px){
-  /* Le titre se resserre plutôt que de se faire couper. */
+@media (max-width:1280px){ .bar .chip .tt,.who label{display:none} }
+@media (max-width:1180px){
   .brand h1{font-size:17px}
   .bar{gap:9px;padding:0 10px}
 }
-@media (max-width:880px){
+@media (max-width:1030px){
   /* Passé ce seuil, la barre prend deux rangées : rien n'est tronqué. */
   .bar{height:auto;flex:0 0 auto;flex-wrap:wrap;padding:8px 10px;gap:8px}
 }
@@ -669,11 +690,14 @@ var cat="repere", showGrid=false, sharp=false, hidePanel=false;
 var hidden={}, me="", hotId=null;
 var mode="local", dirty=false, saving=false, CAP=null;
 
-/* Les deux cartes partagent le repère 1400 × 1050 : elles ont le même
-   rapport 4:3, donc le même quadrillage et le même code de coordonnées. */
+/* Les trois vues partagent le repère 1400 × 1050 : même rapport 4:3,
+   donc le même quadrillage et le même code de coordonnées. « Carte plan »
+   reprend le fond du monde mais garde ses propres annotations : une table
+   à plans, qu'on couvre sans salir la vraie carte. */
 var MAPS={
-  monde :{n:"Monde",  img:"map"},
-  guarma:{n:"Guarma", img:"map2"}
+  monde :{n:"East Wellster", img:"map"},
+  guarma:{n:"Guarma",        img:"map2"},
+  plan  :{n:"Carte plan",    img:"map"}
 };
 var curMap="monde";
 
@@ -731,6 +755,10 @@ function cloudPull(){
       groups=gl;
       var pl=[]; for(k in (d.people||{})) if(d.people[k]) pl.push(d.people[k]);
       people=pl;
+      var mien=myPid?presence[myPid]:null;
+      presence=d.presence||{};
+      if(myPid && mien && !presence[myPid]) presence[myPid]=mien;
+      purgePresence();
       list.sort(function(a,b){ return (a.t||0)-(b.t||0) });
       nl.sort(function(a,b){ return (a.t||0)-(b.t||0) });
       wl.sort(function(a,b){ return (b.t||0)-(a.t||0) });
@@ -744,7 +772,16 @@ function cloudPull(){
 function cloudWatch(){
   if(mode!=="cloud"||typeof EventSource==="undefined")return;
   try{ es=new EventSource(dbUrl("")) }catch(e){ return }
-  function later(){
+  function later(e){
+    /* Une présence qui bat ne justifie pas de relire tout le salon,
+       et ne doit pas être ignorée pendant nos propres écritures :
+       sinon on ne voit jamais arriver personne. */
+    try{
+      var d=JSON.parse((e&&e.data)||"{}");
+      if(typeof d.path==="string" && d.path.indexOf("/presence")===0){
+        applyPresence(d.path,d.data); return;
+      }
+    }catch(err){}
     if(pushing>0)return;
     clearTimeout(pullTimer); pullTimer=setTimeout(cloudPull,350);
   }
@@ -753,6 +790,77 @@ function cloudWatch(){
   es.onopen =function(){ cloudOk=true;  updateStatus() };
   es.onerror=function(){ cloudOk=false; updateStatus() };
 }
+
+/* ══ Qui est là ══════════════════════════════════════════════
+   Chacun dépose un battement sous /presence, rafraîchi toutes les
+   25 secondes. Passé 70 secondes sans nouvelle, la personne est
+   considérée partie. Rien ne se conserve : c'est de l'instantané,
+   pas un journal de fréquentation.                             */
+var presence={}, myPid="", beatTimer=null, whoTimer=null;
+var BEAT=25000, VIVANT=60000, OUBLI=600000, USURE=10000;
+
+/* Une identité par onglet, qui survit au rechargement : sans ça,
+   un F5 se compterait deux fois pendant une minute. */
+function pidMien(){
+  if(myPid) return myPid;
+  try{ myPid=sessionStorage.getItem("cdp:pid")||"" }catch(e){}
+  if(!myPid){
+    myPid="v"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    try{ sessionStorage.setItem("cdp:pid",myPid) }catch(e){}
+  }
+  return myPid;
+}
+function beat(){
+  if(mode!=="cloud")return;
+  var v={n:me||"",t:Date.now()};
+  presence[pidMien()]=v;   /* on se compte sans attendre l'aller-retour */
+  cloudPut("/presence/"+myPid,v);
+  updateStatus();
+}
+function startBeat(){
+  if(mode!=="cloud"||beatTimer)return;
+  beat();
+  beatTimer=setInterval(beat,BEAT);
+  /* Le compteur vieillit tout seul : sans ce battement d'horloge,
+     un partant resterait affiché jusqu'à notre prochain envoi. */
+  setInterval(updateStatus,USURE);
+  addEventListener("pagehide",partir);
+  addEventListener("beforeunload",partir);
+}
+/* On efface sa trace en partant, sans attendre la réponse. */
+function partir(){
+  if(mode!=="cloud"||!myPid)return;
+  try{ fetch(dbUrl("/presence/"+myPid),{method:"DELETE",keepalive:true}) }catch(e){}
+}
+/* Un battement reçu ne vaut pas de relire toute la carte : on
+   l'applique tel quel et on s'arrête là. */
+function applyPresence(path,data){
+  var p=String(path||"").replace(/^\/*presence\/*/,"");
+  if(!p) presence=data||{};
+  else if(data==null) delete presence[p];
+  else presence[p]=data;
+  updateStatus();
+}
+function enLigne(){
+  var now=Date.now(), l=[], k, v;
+  for(k in presence){
+    v=presence[k];
+    if(v && typeof v.t==="number" && now-v.t<VIVANT) l.push({id:k,n:(v.n||"").trim(),t:v.t});
+  }
+  l.sort(function(a,b){ return a.t-b.t });      /* le plus ancien en tête */
+  return l;
+}
+/* Les traces trop vieilles pour être vraies : un onglet fermé
+   brutalement en laisse une. Balayée au prochain relevé complet. */
+function purgePresence(){
+  var now=Date.now(), k;
+  for(k in presence){
+    if(presence[k] && typeof presence[k].t==="number" && now-presence[k].t>OUBLI){
+      delete presence[k]; cloudDel("/presence/"+k);
+    }
+  }
+}
+
 /* Remplace tout le contenu par celui reçu de la base. */
 /* Toutes les annotations du salon, toutes cartes confondues. Seules
    celles de la carte ouverte sont posées dans le DOM. */
@@ -777,7 +885,7 @@ function setMap(id){
   cancelDraft(); closeMenu(); hot(null);
   renderAll(allAnns,notes);
   renderBar(); paint(); fit();
-  toast("Carte : "+MAPS[id].n);
+  toast("Vue : "+MAPS[id].n);
 }
 
 function pref(k,v){
@@ -1062,7 +1170,8 @@ function renderBar(){
    +'</div><div class="sp"></div>'
    +'<div class="who"><label for="who">Signature</label>'
    +'<input id="who" type="text" maxlength="22" placeholder="Ton personnage" value="'+esc(me)+'"></div>'
-   +'<span class="chip" id="chip"><span class="dot"></span><span class="tt"></span></span>'
+   +'<span class="chip" id="chip" tabindex="0"><span class="dot"></span>'
+   +'<b class="nb"></b><span class="tt"></span><span class="pop"></span></span>'
    +'<button class="btn pri" id="bSave" hidden>'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span class="lb">Enregistrer</span></button>'
@@ -1086,7 +1195,10 @@ function renderBar(){
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M4 5h16v14H4zM14 5v14"/></svg></button>';
 
-  $("who").addEventListener("input",function(){ me=this.value.trim(); pref("me",me) });
+  $("who").addEventListener("input",function(){
+    me=this.value.trim(); pref("me",me);
+    clearTimeout(whoTimer); whoTimer=setTimeout(beat,800);  /* le nom suit */
+  });
   $("bSave").addEventListener("click",save);
   $("bFind").addEventListener("click",function(){ searchDialog() });
   $("bPeople").addEventListener("click",peopleListDialog);
@@ -1105,11 +1217,27 @@ function updateStatus(){
   if(!chip)return;
   chip.className="chip"+(mode==="live"||(mode==="cloud"&&cloudOk)?" live":
                          mode==="off"||(mode==="cloud"&&!cloudOk)?" off":dirty?" dirty":"");
-  chip.querySelector(".tt").textContent=
-    mode==="live"   ? "Synchronisé" :
-    mode==="cloud"  ? (cloudOk?"Synchronisé en ligne":"Connexion perdue") :
-    mode==="off"    ? "Lecture seule" :
-    mode==="publish"? (dirty?"Modifications non enregistrées":"À jour") : "Hors ligne";
+  var nb=chip.querySelector(".nb"), tt=chip.querySelector(".tt"), pop=chip.querySelector(".pop");
+  var gens=(mode==="cloud"&&cloudOk)?enLigne():null;
+  if(gens){
+    nb.textContent=gens.length;
+    tt.textContent="en ligne";
+    pop.innerHTML='<span class="ph">'+(gens.length>1?gens.length+" personnes sur la carte":"Seul sur la carte")+'</span>'
+     +gens.map(function(g){
+        return '<span class="pl"><i></i>'+esc(g.n||"Sans signature")
+             +(g.id===myPid?' <b>(toi)</b>':"")+"</span>" }).join("");
+    chip.setAttribute("data-pop","1");
+    chip.title="";
+  }else{
+    nb.textContent="";
+    pop.textContent="";
+    chip.removeAttribute("data-pop");
+    tt.textContent=
+      mode==="live"   ? "Synchronisé" :
+      mode==="cloud"  ? "Connexion perdue" :
+      mode==="off"    ? "Lecture seule" :
+      mode==="publish"? (dirty?"Modifications non enregistrées":"À jour") : "Hors ligne";
+  }
   if(bs){
     bs.hidden = mode!=="publish";
     bs.disabled = saving || !dirty;
@@ -2322,8 +2450,8 @@ function searchDialog(q0){
           t2:esc(w.crime||"motif non précisé")+(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")});
       });
     allAnns.filter(function(a){ return !a.del })
-      .filter(function(a){ var C=CATS[a.cat]||null;
-        return hit(mots,[a.label,a.desc,a.own,grpNom(a.grp),
+      .filter(function(a){ var C=CATS[a.cat]||null, M=MAPS[a.m||"monde"];
+        return hit(mots,[a.label,a.desc,a.own,grpNom(a.grp),M?M.n:"",
                          a.kind==="pin"&&C?C.n:KINDS[a.kind]]) })
       .forEach(function(a){
         var C=CATS[a.cat]||null, p=anchor(a);
@@ -2537,7 +2665,7 @@ document.addEventListener("claude:edit",function(){ readAnns(); readNotes(); ren
 setTimeout(function(){
   if(document.body.hasAttribute("artifact-sync")){ mode="live"; updateStatus(); return }
   if(STANDALONE && DB && DB.indexOf("http")===0){
-    mode="cloud"; room=roomId(); updateStatus(); cloudPull(); cloudWatch(); return;
+    mode="cloud"; room=roomId(); updateStatus(); cloudPull(); cloudWatch(); startBeat(); return;
   }
   if(!window.claude||!window.claude.use){ mode="local"; updateStatus(); return }
   window.claude.use("artifact").then(function(c){
