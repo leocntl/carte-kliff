@@ -415,6 +415,14 @@ button{background:none;border:0;cursor:pointer}
 .wrow .x{opacity:0;color:var(--faint);padding:2px 5px;font-size:15px;line-height:1}
 .wrow:hover .x{opacity:1}
 .wrow .x:hover{color:var(--blood)}
+.gdot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.6);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.gpal{background:var(--ground2);border:1px solid var(--line);border-radius:var(--r);
+  padding:7px;grid-template-columns:repeat(10,1fr);gap:4px}
+.gpal button{width:100%;height:20px;border-radius:2px;border:1px solid rgba(0,0,0,.6);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.gpal button:hover{outline:2px solid var(--brassd);outline-offset:1px}
+.gpal button[data-on="1"]{outline:2px solid var(--brass);outline-offset:1px}
 .note code{font-family:var(--mono);color:var(--dim);font-size:11.5px}
 
 /* ── Toast ────────────────────────────────────── */
@@ -648,6 +656,8 @@ function cloudPull(){
       for(k in (d.anns||{}))   if(d.anns[k])   list.push(d.anns[k]);
       for(k in (d.notes||{}))  if(d.notes[k])  nl.push(d.notes[k]);
       for(k in (d.wanted||{})) if(d.wanted[k]) wl.push(d.wanted[k]);
+      var gl=[]; for(k in (d.groups||{})) if(d.groups[k]) gl.push(d.groups[k]);
+      groups=gl;
       list.sort(function(a,b){ return (a.t||0)-(b.t||0) });
       nl.sort(function(a,b){ return (a.t||0)-(b.t||0) });
       wl.sort(function(a,b){ return (b.t||0)-(a.t||0) });
@@ -755,7 +765,7 @@ function readAnns(){
     var d=gs[i].dataset;
     var a={id:d.id,kind:KINDS[d.kind]?d.kind:"pin",cat:d.cat||"",color:d.color||"#8E1F1B",
            w:num(d.w,3.5),label:d.label||"",by:d.by||"",t:num(d.t,0),
-           m:d.m||"monde", fiche:d.fiche==="1",
+           m:d.m||"monde", fiche:d.fiche==="1", grp:d.grp||"", eff:d.eff||"",
            x:num(d.x,null),y:num(d.y,null),pts:null};
     if(d.pts) a.pts=d.pts.split(" ").map(function(p){var q=p.split(",");return [num(q[0],0),num(q[1],0)]});
     if(a.kind==="pin"&&!CATS[a.cat]) a.cat="repere";
@@ -792,12 +802,20 @@ function headD(p,w){
        +"L"+(b[0]-L*Math.cos(ang+W)).toFixed(1)+","+(b[1]-L*Math.sin(ang+W)).toFixed(1);
 }
 
+/* La couleur du groupe l'emporte sur celle du repère : c'est ce qui
+   fait qu'on lit l'appartenance d'un coup d'œil sur la carte. */
+function effColor(a){
+  var g=a.grp?grpAt(a.grp):null;
+  return (g&&!g.del&&g.color)?g.color:a.color;
+}
 function annMarkup(a){
+  var col=effColor(a);
   var pt=(a.kind==="pin"||a.kind==="cross"||a.kind==="text");
   var at=' class="an'+(pt?" mk":"")+'" data-id="'+esc(a.id)+'" data-kind="'+esc(a.kind)+'"'
    +' data-color="'+esc(a.color)+'" data-w="'+a.w+'" data-f="'+esc(facet(a))+'"';
   if(a.cat)  at+=' data-cat="'+esc(a.cat)+'"';
   at+=' data-m="'+esc(a.m||"monde")+'"';
+  if(a.grp)  at+=' data-grp="'+esc(a.grp)+'" data-eff="'+esc(col)+'"';
   if(a.desc||a.own) at+=' data-fiche="1"';
   if(a.label)at+=' data-label="'+esc(a.label)+'"';
   if(a.by)   at+=' data-by="'+esc(a.by)+'"';
@@ -807,28 +825,28 @@ function annMarkup(a){
     at+=' data-x="'+(a.x||0).toFixed(1)+'" data-y="'+(a.y||0).toFixed(1)+'"'
       + ' style="--x:'+(a.x||0).toFixed(1)+';--y:'+(a.y||0).toFixed(1)+'"';
   }
-  var st='stroke="'+esc(a.color)+'" stroke-width="'+a.w+'"', inner="";
+  var st='stroke="'+esc(col)+'" stroke-width="'+a.w+'"', inner="";
 
   if(a.kind==="pin"){
     var C=CATS[a.cat]||CATS.repere;
-    inner='<circle class="disc" r="11.5" fill="'+esc(a.color)+'"/>'
+    inner='<circle class="disc" r="11.5" fill="'+esc(col)+'"/>'
         + '<path class="glyph" d="'+C.d+'"/>';
-    if(a.label) inner+='<text class="lbl" x="18" y="6" fill="'+esc(a.color)+'">'+esc(a.label)+"</text>";
+    if(a.label) inner+='<text class="lbl" x="18" y="6" fill="'+esc(col)+'">'+esc(a.label)+"</text>";
   }
   else if(a.kind==="cross"){
     var dd="M-10,-10 L10,10 M10,-10 L-10,10";
     inner='<path d="'+dd+'" fill="none" stroke="#F2E6CC" stroke-width="'+(a.w+3.4)+'" stroke-linecap="round"/>'
         + '<path d="'+dd+'" fill="none" '+st+' stroke-linecap="round"/>';
-    if(a.label) inner+='<text class="lbl" x="16" y="6" fill="'+esc(a.color)+'">'+esc(a.label)+"</text>";
+    if(a.label) inner+='<text class="lbl" x="16" y="6" fill="'+esc(col)+'">'+esc(a.label)+"</text>";
   }
   else if(a.kind==="text"){
-    inner='<text class="free" x="0" y="0" fill="'+esc(a.color)+'">'+esc(a.label)+"</text>";
+    inner='<text class="free" x="0" y="0" fill="'+esc(col)+'">'+esc(a.label)+"</text>";
   }
   else if(a.kind==="zone"){
-    inner='<path class="zone" d="'+pathD(a.pts,true)+'" fill="'+esc(a.color)+'" fill-opacity="0.2" '+st+'/>';
+    inner='<path class="zone" d="'+pathD(a.pts,true)+'" fill="'+esc(col)+'" fill-opacity="0.2" '+st+'/>';
     if(a.label){
       var c=centroid(a.pts);
-      inner+='<text class="zname" x="'+c[0].toFixed(1)+'" y="'+c[1].toFixed(1)+'" fill="'+esc(a.color)+'">'+esc(a.label)+"</text>";
+      inner+='<text class="zname" x="'+c[0].toFixed(1)+'" y="'+c[1].toFixed(1)+'" fill="'+esc(col)+'">'+esc(a.label)+"</text>";
     }
   }
   else{
@@ -975,6 +993,9 @@ function renderBar(){
    +'<button class="btn pri" id="bSave" hidden>'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span class="lb">Enregistrer</span></button>'
+   +'<button class="btn" id="bGroups" title="Groupes">'
+   +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+   +'<path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7"/></svg>Groupes</button>'
    +'<button class="btn" id="bWanted" title="Avis de recherche">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9 8h6M9 11h4"/></svg>Avis'
@@ -988,6 +1009,7 @@ function renderBar(){
 
   $("who").addEventListener("input",function(){ me=this.value.trim(); pref("me",me) });
   $("bSave").addEventListener("click",save);
+  $("bGroups").addEventListener("click",groupsListDialog);
   $("bWanted").addEventListener("click",wantedListDialog);
   $("bMenu").addEventListener("click",function(){ shareMenu(this) });
   $("maps").addEventListener("click",function(e){
@@ -1137,7 +1159,7 @@ function renderPanel(){
       var a=anns[i], C=CATS[a.cat]||null, p=anchor(a);
       var name=a.label||(a.kind==="pin"&&C?C.n:KINDS[a.kind]);
       h+='<div class="row" data-id="'+esc(a.id)+'" data-x="'+p[0]+'" data-y="'+p[1]+'" data-off="'+(hidden[facet(a)]?1:0)+'">'
-       +'<span class="ic" style="background:'+esc(a.color)+'">'
+       +'<span class="ic" style="background:'+esc(a.eff||a.color)+'">'
        +(C?'<svg viewBox="-9 -9 18 18"><path d="'+C.d+'"/></svg>':"")+"</span>"
        +'<span class="tx"><span class="t1">'+esc(name)+(a.fiche?' <i class="fic">fiche</i>':"")+'</span>'
        +'<span class="t2"><b>'+coordOf(p[0],p[1])+"</b>"
@@ -1265,7 +1287,14 @@ stage.addEventListener("pointercancel",function(e){
 });
 stage.addEventListener("dblclick",function(e){
   if(draft&&draft.kind==="zone"){ closeZone(); return }
-  var g=e.target.closest("g.an[data-id]");
+  /* L'outil Déplacer capture le pointeur au premier appui : la seconde
+     moitié du double-clic est alors adressée au fond de scène, et non
+     au repère. On interroge donc ce qui est réellement sous le curseur. */
+  var g=e.target.closest?e.target.closest("g.an[data-id]"):null;
+  if(!g){
+    var el=document.elementFromPoint(e.clientX,e.clientY);
+    g=(el&&el.closest)?el.closest("g.an[data-id]"):null;
+  }
   if(g) sheetDialog(g.getAttribute("data-id"));
 });
 stage.addEventListener("wheel",function(e){
@@ -1536,7 +1565,11 @@ function sheetDialog(id){
    +' · <b>'+coordOf(p[0],p[1])+"</b>"
    +(a.by?" · posé par "+esc(a.by):"")+(a.t?" · "+fmtAgo(a.t):"")+"</span></div>"
    +'<label class="fl">Nom<input type="text" id="fNom" maxlength="80" value="'+esc(a.label||"")+'"></label>'
-   +'<label class="fl">Tenu par<input type="text" id="fOwn" maxlength="60" placeholder="bande, personnage, personne…" value="'+esc(a.own||"")+'"></label>'
+   +'<label class="fl">Groupe<select id="fGrp"><option value="">— aucun —</option>'
+   +groups.filter(function(g){return !g.del}).map(function(g){
+       return '<option value="'+esc(g.id)+'"'+(a.grp===g.id?" selected":"")+">"+esc(g.name)+"</option>" }).join("")
+   +"</select></label>"
+   +'<label class="fl">Tenu par<input type="text" id="fOwn" maxlength="60" placeholder="précision libre…" value="'+esc(a.own||"")+'"></label>'
    +'<label class="fl">Description<textarea id="fDesc" class="fdesc" maxlength="2000" placeholder="Ce qu\'on y trouve, ce qui s\'y est passé, qui le fréquente…">'+esc(a.desc||"")+"</textarea></label>";
 
   var h=(a.h||[]).slice().reverse();
@@ -1557,11 +1590,103 @@ function sheetDialog(id){
   v.querySelector("[data-o]").onclick=function(){
     var kv={};
     var n2=nom.value.trim(), o2=v.querySelector("#fOwn").value.trim(), d2=v.querySelector("#fDesc").value.trim();
+    var g2=v.querySelector("#fGrp").value;
     if(n2!==(a.label||"")) kv.label=n2;
     if(o2!==(a.own||""))   kv.own=o2;
     if(d2!==(a.desc||""))  kv.desc=d2;
+    if(g2!==(a.grp||""))   kv.grp=g2;
     v.remove();
     if(Object.keys(kv).length){ setAttrs(id,kv); toast("Fiche enregistrée","ok") }
+  };
+}
+
+/* ══ Groupes ═════════════════════════════════════════════════
+   Une bande, une famille, une compagnie. Sa couleur s'impose à
+   tous les repères qui lui sont rattachés.                     */
+var groups=[];
+function grpAt(id){ for(var i=0;i<groups.length;i++) if(groups[i].id===id) return groups[i]; return null }
+function grpMembres(id){ var n=0; allAnns.forEach(function(a){ if(!a.del&&a.grp===id)n++ }); return n }
+
+function saveGroup(g){
+  var i,f=false;
+  for(i=0;i<groups.length;i++) if(groups[i].id===g.id){ groups[i]=g; f=true }
+  if(!f) groups.push(g);
+  cloudPut("/groups/"+g.id,g);
+  renderAll(allAnns,notes);        /* la couleur des membres a pu changer */
+  renderBar();
+}
+
+function groupsListDialog(){
+  var live=groups.filter(function(g){return !g.del});
+  var body='<div class="wtop"><p>'+(live.length?live.length+" groupe"+(live.length>1?"s":"")+" au registre."
+      :"Aucun groupe pour l’instant.")+'</p><button class="btn pri" data-new>Nouveau groupe</button></div>';
+  if(live.length){
+    body+='<div class="wlist">';
+    live.forEach(function(g){
+      var n=grpMembres(g.id);
+      body+='<div class="wrow" data-open="'+esc(g.id)+'">'
+        +'<span class="gdot" style="background:'+esc(g.color)+'"></span>'
+        +'<span class="tx"><span class="t1">'+esc(g.name||"Sans nom")+"</span>"
+        +'<span class="t2">'+(n?n+" repère"+(n>1?"s":""):"aucun repère")
+        +(g.chief?" · mené par "+esc(g.chief):"")+"</span></span>"
+        +'<button class="x" data-del="'+esc(g.id)+'" title="Dissoudre" aria-label="Dissoudre">×</button></div>';
+    });
+    body+="</div>";
+  }
+  var v=dialog("Groupes",body,'<button class="btn pri" data-x>Fermer</button>');
+  v.querySelector("[data-x]").onclick=function(){ v.remove() };
+  v.addEventListener("click",function(e){
+    if(e.target.closest("[data-new]")){ v.remove(); groupSheet(null); return }
+    var d=e.target.closest("[data-del]");
+    if(d){ e.stopPropagation();
+      var g=grpAt(d.dataset.del);
+      if(g){
+        var n=grpMembres(g.id);
+        if(n && !confirm("Dissoudre ce groupe ? "+n+" repère"+(n>1?"s retrouveront":" retrouvera")+" sa couleur d’origine.")) return;
+        g.del=Date.now(); g.delBy=me||""; saveGroup(g);
+      }
+      v.remove(); groupsListDialog(); return }
+    var o=e.target.closest("[data-open]");
+    if(o){ v.remove(); groupSheet(o.dataset.open) }
+  });
+}
+
+function groupSheet(id){
+  var g=id?grpAt(id):null;
+  var neuf=!g;
+  if(neuf) g={id:nid(),name:"",color:COLORS[0][0],chief:"",desc:"",by:me||"",t:Date.now()};
+  var pal="";
+  COLORS.forEach(function(c){
+    pal+='<button type="button" data-c="'+c[0]+'" style="background:'+c[0]+'" title="'+esc(c[1])+'"'
+       + (String(g.color).toLowerCase()===c[0].toLowerCase()?' data-on="1"':"")+"></button>";
+  });
+  var body=""
+   +'<label class="fl">Nom du groupe<input type="text" id="gName" maxlength="60" value="'+esc(g.name||"")+'"></label>'
+   +'<label class="fl">Mené par<input type="text" id="gChief" maxlength="60" placeholder="nom du meneur" value="'+esc(g.chief||"")+'"></label>'
+   +'<div class="fl">Couleur<div class="pal gpal" id="gPal">'+pal+"</div></div>"
+   +'<label class="fl">Description<textarea id="gDesc" class="fdesc" maxlength="2000" placeholder="Territoire, activités, alliances, rivalités…">'+esc(g.desc||"")+"</textarea></label>";
+  if(!neuf) body+='<div class="fhist"><span class="fhr">'+grpMembres(g.id)+" repère(s) rattaché(s) · ouvert par "+esc(g.by||"?")+" · "+fmtAgo(g.t)+"</span></div>";
+
+  var v=dialog(neuf?"Nouveau groupe":"Fiche de groupe",body,
+    '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
+  var choisie=g.color;
+  v.querySelector("#gPal").addEventListener("click",function(e){
+    var b=e.target.closest("button[data-c]"); if(!b)return;
+    choisie=b.dataset.c;
+    [].forEach.call(this.querySelectorAll("button"),function(x){ x.removeAttribute("data-on") });
+    b.setAttribute("data-on","1");
+  });
+  v.querySelector("#gName").focus();
+  v.querySelector("[data-x]").onclick=function(){ v.remove(); groupsListDialog() };
+  v.querySelector("[data-o]").onclick=function(){
+    var nom=v.querySelector("#gName").value.trim();
+    if(!nom){ toast("Il faut au moins un nom","bad"); return }
+    g.name=nom; g.color=choisie;
+    g.chief=v.querySelector("#gChief").value.trim();
+    g.desc =v.querySelector("#gDesc").value.trim();
+    saveGroup(g);
+    v.remove(); groupsListDialog();
+    toast(neuf?"Groupe créé":"Groupe mis à jour","ok");
   };
 }
 
