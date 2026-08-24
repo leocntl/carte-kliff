@@ -411,12 +411,12 @@ button{background:none;border:0;cursor:pointer}
 .fl select:focus{border-color:var(--brassd);outline:none}
 .wlist{display:flex;flex-direction:column;gap:2px;max-height:330px;overflow-y:auto;
   margin:0 -4px;scrollbar-width:thin}
-.wrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:11px;
+.wrow{display:flex;align-items:center;gap:11px;
   padding:9px 6px;border-radius:2px;cursor:pointer}
 .wrow:hover{background:rgba(255,255,255,.045)}
 .wst{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#fff;
-  padding:3px 8px;border-radius:100px;white-space:nowrap}
-.wrow .tx{min-width:0}
+  padding:3px 8px;border-radius:100px;white-space:nowrap;flex:0 0 auto}
+.wrow .tx{min-width:0;flex:1}
 .wrow .t1{display:block;font-size:13.5px;font-weight:500;color:var(--ink)}
 .wrow .t2{display:block;font-size:11.5px;color:var(--faint);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -425,7 +425,7 @@ button{background:none;border:0;cursor:pointer}
 .wrow:hover .x{opacity:1}
 .wrow .x:hover{color:var(--blood)}
 .alias{font-style:normal;font-size:11.5px;color:var(--faint);font-weight:400}
-.gdot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.6);
+.gdot{width:16px;height:16px;flex:0 0 16px;border-radius:50%;border:1px solid rgba(0,0,0,.6);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
 .gpal{display:grid;background:var(--ground2);border:1px solid var(--line);border-radius:var(--r);
   padding:7px;grid-template-columns:repeat(10,1fr);gap:4px}
@@ -434,6 +434,52 @@ button{background:none;border:0;cursor:pointer}
 .gpal button:hover{outline:2px solid var(--brassd);outline-offset:1px}
 .gpal button[data-on="1"]{outline:2px solid var(--brass);outline-offset:1px}
 .note code{font-family:var(--mono);color:var(--dim);font-size:11.5px}
+
+/* ── Recherche & listes filtrables ────────────── */
+.wfind{display:flex;align-items:center;gap:8px;padding:0 10px;
+  background:var(--ground2);border:1px solid var(--line);border-radius:var(--r)}
+.wfind:focus-within{border-color:var(--brassd)}
+.dlg .wfind input[type=text]{flex:1;min-width:0;width:auto;padding:8px 0;
+  background:none;border:0;border-radius:0;font-size:13.5px;color:var(--ink)}
+.dlg .wfind input[type=text]:focus{border:0;outline:none}
+.wfind input::placeholder{color:var(--faint)}
+.wfind select{flex:0 0 auto;max-width:46%;padding:6px 5px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:2px;color:var(--dim);
+  font-family:var(--sans);font-size:11.5px}
+.wfind select:focus{outline:none;border-color:var(--brassd)}
+.qic{width:15px;height:15px;flex:0 0 15px;color:var(--faint);fill:none}
+#plist,#glist,#wlistbox,.qres{flex:0 0 auto}
+.wsec{display:flex;align-items:center;gap:7px;padding:11px 6px 4px;
+  font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.wsec:first-child{padding-top:2px}
+.gdot.sm{width:9px;height:9px;flex:0 0 9px}
+.qvide{padding:22px 14px;text-align:center;color:var(--faint);
+  font-size:12.5px;line-height:1.7}
+.rech{font-style:normal;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:#E9A79E;border:1px solid #7A2C24;background:rgba(179,51,43,.16);
+  border-radius:100px;padding:1px 5px;margin-left:5px;vertical-align:1px}
+.lk{display:inline-block;align-self:flex-start;margin-top:8px;padding:0;
+  font-size:12px;color:var(--brass);border-bottom:1px solid var(--brassd);line-height:1.5}
+.lk:hover{filter:brightness(1.2)}
+.lkrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.lkn{font-size:11.5px;color:var(--faint)}
+.lkrow .lk{margin-top:0}
+.wlist.lite{max-height:154px;margin-top:6px}
+.wlist.lite .wrow{padding:6px;cursor:pointer}
+.fl input:disabled,.fl select:disabled{opacity:.55;cursor:not-allowed}
+.qbox{display:flex;align-items:center;gap:10px;padding:0 12px;
+  background:var(--ground2);border:1px solid var(--line);border-radius:var(--r)}
+.qbox:focus-within{border-color:var(--brassd)}
+.dlg .qbox input[type=text]{flex:1;min-width:0;width:auto;padding:11px 0;
+  background:none;border:0;border-radius:0;font-size:15px;color:var(--ink)}
+.dlg .qbox input[type=text]:focus{border:0;outline:none}
+.qbox input::placeholder{color:var(--faint)}
+.qres{max-height:min(52vh,420px);overflow-y:auto;scrollbar-width:thin}
+.qres::-webkit-scrollbar,.wlist::-webkit-scrollbar{width:9px}
+.qres::-webkit-scrollbar-thumb,.wlist::-webkit-scrollbar-thumb{
+  background:var(--line2);border-radius:9px;border:3px solid var(--panel)}
+.qres .wrow[data-sel="1"]{background:var(--brassg);box-shadow:inset 2px 0 0 var(--brass)}
+.qhint{margin-right:auto;align-self:center;font-size:11px;color:var(--faint)}
 
 /* ── Toast ────────────────────────────────────── */
 .toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;
@@ -447,6 +493,21 @@ button{background:none;border:0;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* ── Étroit ───────────────────────────────────── */
+@media (max-width:1500px){ .brand .sub{display:none} }
+@media (max-width:1420px){
+  .bar .lb2,.bar .lb{display:none}
+  .bar{gap:12px}
+}
+@media (max-width:1200px){ .bar .chip .tt,.who label{display:none} }
+@media (max-width:1030px){
+  /* Le titre se resserre plutôt que de se faire couper. */
+  .brand h1{font-size:17px}
+  .bar{gap:9px;padding:0 10px}
+}
+@media (max-width:880px){
+  /* Passé ce seuil, la barre prend deux rangées : rien n'est tronqué. */
+  .bar{height:auto;flex:0 0 auto;flex-wrap:wrap;padding:8px 10px;gap:8px}
+}
 @media (max-width:900px){
   .panel{position:absolute;right:0;top:0;bottom:0;z-index:20;flex-basis:264px;
     box-shadow:-14px 0 40px rgba(0,0,0,.6)}
@@ -1005,25 +1066,29 @@ function renderBar(){
    +'<button class="btn pri" id="bSave" hidden>'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg><span class="lb">Enregistrer</span></button>'
+   +'<button class="btn" id="bFind" title="Rechercher (R)" aria-label="Rechercher">'
+   +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+   +'<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/><path d="M16.2 16.2 21 21"/></svg></button>'
    +'<button class="btn" id="bPeople" title="Personnes">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-   +'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/></svg>Personnes</button>'
+   +'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 21a7 7 0 0 1 14 0"/></svg><span class="lb2">Personnes</span></button>'
    +'<button class="btn" id="bGroups" title="Groupes">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-   +'<path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7"/></svg>Groupes</button>'
+   +'<path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7"/></svg><span class="lb2">Groupes</span></button>'
    +'<button class="btn" id="bWanted" title="Avis de recherche">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-   +'<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9 8h6M9 11h4"/></svg>Avis'
+   +'<path d="M6 3h12v18l-6-4-6 4z"/><path d="M9 8h6M9 11h4"/></svg><span class="lb2">Avis</span>'
    +(nbRecherches()?'<i class="cnt">'+nbRecherches()+'</i>':'')+'</button>'
    +'<button class="btn" id="bMenu">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-   +'<path d="M12 4v11M8 11l4 4 4-4M4 19h16"/></svg>Partage</button>'
+   +'<path d="M12 4v11M8 11l4 4 4-4M4 19h16"/></svg><span class="lb2">Partage</span></button>'
    +'<button class="btn" id="bPanel" title="Registre (P)" aria-label="Registre">'
    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
    +'<path d="M4 5h16v14H4zM14 5v14"/></svg></button>';
 
   $("who").addEventListener("input",function(){ me=this.value.trim(); pref("me",me) });
   $("bSave").addEventListener("click",save);
+  $("bFind").addEventListener("click",function(){ searchDialog() });
   $("bPeople").addEventListener("click",peopleListDialog);
   $("bGroups").addEventListener("click",groupsListDialog);
   $("bWanted").addEventListener("click",wantedListDialog);
@@ -1438,12 +1503,18 @@ var keys={};
 addEventListener("keydown",function(e){
   keys[e.key]=true;
   var t=e.target.tagName;
-  if(t==="INPUT"||t==="TEXTAREA"){ if(e.key==="Escape")e.target.blur(); return }
+  if(t==="INPUT"||t==="TEXTAREA"){
+    /* Échap referme d'abord la liste ouverte, sinon rend la main au champ. */
+    if(e.key==="Escape"){ var vv=e.target.closest(".veil[data-esc]");
+      if(vv)vv.remove(); else e.target.blur() }
+    return }
   var low=e.key.toLowerCase();
   if((e.ctrlKey||e.metaKey)&&low==="z"){ e.preventDefault(); undo(); return }
   if((e.ctrlKey||e.metaKey)&&low==="s"){ e.preventDefault(); if(mode==="publish")save(); return }
   if(e.ctrlKey||e.metaKey)return;
-  if(e.key==="Escape"){ if(draft)cancelDraft(); else closeMenu(); return }
+  if(e.key==="Escape"){
+    var vs=document.querySelectorAll(".veil[data-esc]"), ve=vs[vs.length-1];
+    if(ve)ve.remove(); else if(draft)cancelDraft(); else closeMenu(); return }
   if(e.key==="Enter"&&draft&&draft.kind==="zone"){ closeZone(); return }
   if(e.key==="Delete"&&hotId){ delAnn(hotId); return }
   var k=e.key.toUpperCase(), hit=null;
@@ -1455,6 +1526,7 @@ addEventListener("keydown",function(e){
   else if(k==="C"){ var cb=$("curcol"); if(cb)colorMenu(cb) }
   else if(k==="G"){ showGrid=!showGrid; renderHud() }
   else if(k==="P"){ hidePanel=!hidePanel; panel.dataset.hide=hidePanel?"1":"0" }
+  else if(k==="R"||e.key==="/"){ e.preventDefault(); searchDialog() }
 });
 addEventListener("keyup",function(e){ keys[e.key]=false });
 
@@ -1616,12 +1688,30 @@ function sheetDialog(id){
   };
 }
 
-/* ══ Groupes ═════════════════════════════════════════════════
-   Une bande, une famille, une compagnie. Sa couleur s'impose à
-   tous les repères qui lui sont rattachés.                     */
+/* ══ Recherche ═══════════════════════════════════════════════
+   Une seule barre pour retrouver un repère, une personne, un
+   groupe ou un avis. On n'y crée rien : on ne fait qu'ouvrir.  */
+function norm(s){
+  s=String(s==null?"":s).toLowerCase();
+  try{ s=s.normalize("NFD").replace(/[\u0300-\u036f]/g,"") }catch(e){}
+  return s;
+}
+/* La requête est découpée en mots : tous doivent se retrouver,
+   peu importe dans quel champ et dans quel ordre. */
+function qWords(q){
+  return norm(q).split(/\s+/).filter(function(w){ return w.length>0 });
+}
+function hit(mots,champs){
+  var foin=norm(champs.join(" "));
+  for(var i=0;i<mots.length;i++) if(foin.indexOf(mots[i])<0) return false;
+  return true;
+}
+function grpNom(id){ var g=id?grpAt(id):null; return (g&&!g.del)?(g.name||""):"" }
+function parNom(a,b){ return (a.name||"").localeCompare(b.name||"") }
+
 /* ══ Personnes ═══════════════════════════════════════════════
    Qui peuple la carte. Chacune peut être rattachée à un groupe,
-   dont elle reprend la couleur.                                */
+   dont elle reprend la couleur, et porter des avis de recherche. */
 var people=[];
 var PSTATUS={
   vivant :{n:"Vivant",  c:"#2D6A4F"},
@@ -1629,57 +1719,153 @@ var PSTATUS={
   disparu:{n:"Disparu", c:"#5A5A52"},
   mort   :{n:"Mort",    c:"#1C1712"}
 };
+var PORDRE=Object.keys(PSTATUS);
+var PSORTS={
+  nom   :"Ordre alphabétique",
+  grp   :"Par groupe",
+  etat  :"Par état",
+  recent:"Les plus récentes"
+};
+var psort=pref("psort")||"nom";
+if(!PSORTS[psort]) psort="nom";
+
 function persAt(id){ for(var i=0;i<people.length;i++) if(people[i].id===id) return people[i]; return null }
 function grpGens(id){ var n=0; people.forEach(function(p){ if(!p.del&&p.grp===id)n++ }); return n }
+/* Les avis ouverts au nom d'une personne : c'est le lien entre
+   les deux registres. */
+function persAvis(id){
+  if(!id) return [];
+  return wanted.filter(function(w){ return !w.del && w.pid===id });
+}
+function persRecherchee(id){
+  var l=persAvis(id);
+  for(var i=0;i<l.length;i++) if((l[i].st||"recherche")==="recherche") return true;
+  return false;
+}
 
 function savePerson(p){
   var i,f=false;
   for(i=0;i<people.length;i++) if(people[i].id===p.id){ people[i]=p; f=true }
   if(!f) people.push(p);
   cloudPut("/people/"+p.id,p);
+  syncAvis(p);
   renderBar();
+}
+/* Un avis lié porte toujours le nom et l'appartenance de sa fiche :
+   on renomme la personne, les avis suivent. */
+function syncAvis(p){
+  var gn=grpNom(p.grp);
+  persAvis(p.id).forEach(function(w){
+    if(w.name===p.name && w.grp===gn) return;
+    w.name=p.name; w.grp=gn;
+    cloudPut("/wanted/"+w.id,w);
+  });
 }
 
 function peopleListDialog(){
-  var live=people.filter(function(p){return !p.del});
-  live.sort(function(a,b){ return (a.name||"").localeCompare(b.name||"") });
-  var body='<div class="wtop"><p>'+(live.length?live.length+" personne"+(live.length>1?"s":"")+" au registre."
-      :"Personne au registre pour l’instant.")+'</p><button class="btn pri" data-new>Nouvelle personne</button></div>';
-  if(live.length){
-    body+='<div class="wlist">';
-    live.forEach(function(p){
-      var g=p.grp?grpAt(p.grp):null;
-      var S=PSTATUS[p.st||"vivant"]||PSTATUS.vivant;
-      body+='<div class="wrow" data-open="'+esc(p.id)+'">'
-        +'<span class="gdot" style="background:'+esc(g&&!g.del?g.color:"#3C3C42")+'"></span>'
-        +'<span class="tx"><span class="t1">'+esc(p.name||"Sans nom")
-        +(p.alias?' <i class="alias">dit '+esc(p.alias)+"</i>":"")+"</span>"
-        +'<span class="t2">'+(g&&!g.del?esc(g.name)+" · ":"")+esc(p.job||"sans métier connu")+"</span></span>"
-        +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
-        +'<button class="x" data-del="'+esc(p.id)+'" title="Retirer" aria-label="Retirer">×</button></div>';
-    });
-    body+="</div>";
-  }
+  var body='<div class="wtop"><p id="pcnt"></p><button class="btn pri" data-new>Nouvelle personne</button></div>'
+   +'<div class="wfind">'
+   +'<svg class="qic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">'
+   +'<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/><path d="M16.2 16.2 21 21"/></svg>'
+   +'<input type="text" id="pq" maxlength="40" placeholder="Nom, surnom, métier, groupe…">'
+   +'<select id="psort" aria-label="Tri">'
+   +Object.keys(PSORTS).map(function(k){
+       return '<option value="'+k+'"'+(psort===k?" selected":"")+">"+PSORTS[k]+"</option>" }).join("")
+   +"</select></div>"
+   +'<div id="plist"></div>';
   var v=dialog("Personnes",body,'<button class="btn pri" data-x>Fermer</button>');
+  v.dataset.esc="1";
+  var q=v.querySelector("#pq"), s=v.querySelector("#psort");
+
+  function draw(){
+    var mots=qWords(q.value), tous=people.filter(function(p){ return !p.del });
+    var live=tous.filter(function(p){
+      if(!mots.length) return true;
+      return hit(mots,[p.name,p.alias,p.job,p.desc,grpNom(p.grp),
+                       (PSTATUS[p.st||"vivant"]||PSTATUS.vivant).n]);
+    });
+    live.sort(function(a,b){
+      if(psort==="recent") return (b.t||0)-(a.t||0);
+      if(psort==="etat"){
+        var oa=PORDRE.indexOf(a.st||"vivant"), ob=PORDRE.indexOf(b.st||"vivant");
+        if(oa!==ob) return oa-ob;
+      }
+      if(psort==="grp"){
+        var ga=grpNom(a.grp), gb=grpNom(b.grp);
+        if(!ga!==!gb) return ga?-1:1;
+        if(ga!==gb) return ga.localeCompare(gb);
+      }
+      return parNom(a,b);
+    });
+
+    v.querySelector("#pcnt").textContent = !tous.length ? "Personne au registre pour l’instant."
+      : mots.length ? live.length+" sur "+tous.length+" personne"+(tous.length>1?"s":"")+"."
+      : tous.length+" personne"+(tous.length>1?"s":"")+" au registre.";
+
+    var h="", secte=null;
+    if(!live.length){
+      h='<div class="qvide">'+(tous.length?"Aucune personne ne répond à cette recherche."
+        :"Ouvre une première fiche pour commencer.")+"</div>";
+    }else{
+      h='<div class="wlist">';
+      live.forEach(function(p){
+        var g=p.grp?grpAt(p.grp):null, vivg=(g&&!g.del);
+        if(psort==="grp"){
+          var titre=vivg?g.name:"Sans groupe";
+          if(titre!==secte){
+            secte=titre;
+            h+='<div class="wsec"><span class="gdot sm" style="background:'+esc(vivg?g.color:"#3C3C42")+'"></span>'
+              +esc(titre)+"</div>";
+          }
+        }
+        if(psort==="etat"){
+          var S0=PSTATUS[p.st||"vivant"]||PSTATUS.vivant;
+          if(S0.n!==secte){ secte=S0.n;
+            h+='<div class="wsec"><span class="gdot sm" style="background:'+S0.c+'"></span>'+esc(S0.n)+"</div>" }
+        }
+        var S=PSTATUS[p.st||"vivant"]||PSTATUS.vivant, na=persAvis(p.id).length;
+        h+='<div class="wrow" data-open="'+esc(p.id)+'">'
+         +'<span class="gdot" style="background:'+esc(vivg?g.color:"#3C3C42")+'"></span>'
+         +'<span class="tx"><span class="t1">'+esc(p.name||"Sans nom")
+         +(p.alias?' <i class="alias">dit '+esc(p.alias)+"</i>":"")
+         +(persRecherchee(p.id)?' <i class="rech">recherché</i>':(na?' <i class="fic">avis</i>':""))+"</span>"
+         +'<span class="t2">'+(vivg?esc(g.name)+" · ":"")+esc(p.job||"sans métier connu")+"</span></span>"
+         +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
+         +'<button class="x" data-del="'+esc(p.id)+'" title="Retirer" aria-label="Retirer">×</button></div>';
+      });
+      h+="</div>";
+    }
+    v.querySelector("#plist").innerHTML=h;
+  }
+  draw();
+  q.addEventListener("input",draw);
+  s.addEventListener("change",function(){ psort=this.value; pref("psort",psort); draw() });
+  q.focus();
+
   v.querySelector("[data-x]").onclick=function(){ v.remove() };
   v.addEventListener("click",function(e){
     if(e.target.closest("[data-new]")){ v.remove(); personSheet(null); return }
     var d=e.target.closest("[data-del]");
     if(d){ e.stopPropagation();
       var p=persAt(d.dataset.del);
-      if(p){ p.del=Date.now(); p.delBy=me||""; savePerson(p) }
-      v.remove(); peopleListDialog(); return }
+      if(p){
+        var na=persAvis(p.id).length;
+        if(na && !confirm("Retirer cette fiche ? "+na+" avis de recherche "+(na>1?"perdront leur lien.":"perdra son lien."))) return;
+        p.del=Date.now(); p.delBy=me||""; savePerson(p);
+      }
+      draw(); return }
     var o=e.target.closest("[data-open]");
     if(o){ v.remove(); personSheet(o.dataset.open) }
   });
 }
 
-function personSheet(id){
+function personSheet(id,retour){
   var p=id?persAt(id):null;
   var neuf=!p;
+  retour=retour||peopleListDialog;
   if(neuf) p={id:nid(),name:"",alias:"",grp:"",job:"",st:"vivant",desc:"",by:me||"",t:Date.now()};
   var gopts='<option value="">— aucune —</option>';
-  groups.filter(function(g){return !g.del}).forEach(function(g){
+  groups.filter(function(g){return !g.del}).sort(parNom).forEach(function(g){
     gopts+='<option value="'+esc(g.id)+'"'+(p.grp===g.id?" selected":"")+">"+esc(g.name)+"</option>";
   });
   var sopts="";
@@ -1693,27 +1879,63 @@ function personSheet(id){
    +'<label class="fl">État<select id="pSt">'+sopts+"</select></label></div>"
    +'<label class="fl">Métier<input type="text" id="pJob" maxlength="70" placeholder="forgeron, hors-la-loi, shérif…" value="'+esc(p.job||"")+'"></label>'
    +'<label class="fl">Description<textarea id="pDesc" class="fdesc" maxlength="2000" placeholder="Apparence, caractère, histoire, relations…">'+esc(p.desc||"")+"</textarea></label>";
-  if(!neuf) body+='<div class="fhist"><span class="fhr">Fiche ouverte par '+esc(p.by||"?")+" · "+fmtAgo(p.t)+"</span></div>";
+
+  if(!neuf){
+    var av=persAvis(p.id);
+    body+='<div class="fhist"><span class="fhl">Avis de recherche</span>';
+    if(av.length){
+      body+='<div class="wlist lite">';
+      av.forEach(function(w){
+        var S=WSTATUS[w.st||"recherche"]||WSTATUS.recherche;
+        body+='<div class="wrow" data-avis="'+esc(w.id)+'">'
+         +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
+         +'<span class="tx"><span class="t2">'+esc(w.crime||"motif non précisé")
+         +(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")+"</span></span></div>";
+      });
+      body+="</div>";
+    }else body+='<span class="fhr">Aucun avis à son nom.</span>';
+    body+='<button type="button" class="lk" data-newavis>Ouvrir un avis à son nom</button></div>';
+    body+='<div class="fhist"><span class="fhr">Fiche ouverte par '+esc(p.by||"?")+" · "+fmtAgo(p.t)+"</span></div>";
+  }
 
   var v=dialog(neuf?"Nouvelle personne":"Fiche de personne",body,
     '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
   v.querySelector("#pName").focus();
-  v.querySelector("[data-x]").onclick=function(){ v.remove(); peopleListDialog() };
-  v.querySelector("[data-o]").onclick=function(){
+
+  /* Lit le formulaire dans la fiche. Faux si le nom manque. */
+  function lire(){
     var nom=v.querySelector("#pName").value.trim();
-    if(!nom){ toast("Il faut au moins un nom","bad"); return }
+    if(!nom){ toast("Il faut au moins un nom","bad"); return false }
     p.name =nom;
     p.alias=v.querySelector("#pAlias").value.trim();
     p.grp  =v.querySelector("#pGrp").value;
     p.st   =v.querySelector("#pSt").value;
     p.job  =v.querySelector("#pJob").value.trim();
     p.desc =v.querySelector("#pDesc").value.trim();
+    return true;
+  }
+
+  v.querySelector("[data-x]").onclick=function(){ v.remove(); retour() };
+  v.querySelector("[data-o]").onclick=function(){
+    if(!lire())return;
     savePerson(p);
-    v.remove(); peopleListDialog();
+    v.remove(); retour();
     toast(neuf?"Fiche créée":"Fiche mise à jour","ok");
   };
+  /* Passer aux avis, c'est quitter la fiche : on l'enregistre d'abord,
+     pour ne rien perdre en chemin. */
+  v.addEventListener("click",function(e){
+    var a=e.target.closest("[data-avis]");
+    if(a){ if(!lire())return; savePerson(p); v.remove();
+      wantedSheet(a.dataset.avis,function(){ personSheet(p.id,retour) }); return }
+    if(e.target.closest("[data-newavis]")){ if(!lire())return; savePerson(p); v.remove();
+      wantedSheet(null,function(){ personSheet(p.id,retour) },{pid:p.id}); return }
+  });
 }
 
+/* ══ Groupes ═════════════════════════════════════════════════
+   Une bande, une famille, une compagnie. Sa couleur s'impose à
+   tous les repères qui lui sont rattachés.                     */
 var groups=[];
 function grpAt(id){ for(var i=0;i<groups.length;i++) if(groups[i].id===id) return groups[i]; return null }
 function grpMembres(id){ var n=0; allAnns.forEach(function(a){ if(!a.del&&a.grp===id)n++ }); return n }
@@ -1723,28 +1945,56 @@ function saveGroup(g){
   for(i=0;i<groups.length;i++) if(groups[i].id===g.id){ groups[i]=g; f=true }
   if(!f) groups.push(g);
   cloudPut("/groups/"+g.id,g);
+  people.forEach(function(p){ if(!p.del&&p.grp===g.id) syncAvis(p) });
   renderAll(allAnns,notes);        /* la couleur des membres a pu changer */
   renderBar();
 }
 
 function groupsListDialog(){
-  var live=groups.filter(function(g){return !g.del});
-  var body='<div class="wtop"><p>'+(live.length?live.length+" groupe"+(live.length>1?"s":"")+" au registre."
-      :"Aucun groupe pour l’instant.")+'</p><button class="btn pri" data-new>Nouveau groupe</button></div>';
-  if(live.length){
-    body+='<div class="wlist">';
-    live.forEach(function(g){
-      var n=grpMembres(g.id);
-      body+='<div class="wrow" data-open="'+esc(g.id)+'">'
-        +'<span class="gdot" style="background:'+esc(g.color)+'"></span>'
-        +'<span class="tx"><span class="t1">'+esc(g.name||"Sans nom")+"</span>"
-        +'<span class="t2">'+(n?n+" repère"+(n>1?"s":""):"aucun repère")+(grpGens(g.id)?" · "+grpGens(g.id)+" personne"+(grpGens(g.id)>1?"s":""):"")
-        +(g.chief?" · mené par "+esc(g.chief):"")+"</span></span>"
-        +'<button class="x" data-del="'+esc(g.id)+'" title="Dissoudre" aria-label="Dissoudre">×</button></div>';
-    });
-    body+="</div>";
-  }
+  var body='<div class="wtop"><p id="gcnt"></p><button class="btn pri" data-new>Nouveau groupe</button></div>'
+   +'<div class="wfind">'
+   +'<svg class="qic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">'
+   +'<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/><path d="M16.2 16.2 21 21"/></svg>'
+   +'<input type="text" id="gq" maxlength="40" placeholder="Nom du groupe, meneur, territoire…"></div>'
+   +'<div id="glist"></div>';
   var v=dialog("Groupes",body,'<button class="btn pri" data-x>Fermer</button>');
+  v.dataset.esc="1";
+  var q=v.querySelector("#gq");
+
+  function draw(){
+    var mots=qWords(q.value), tous=groups.filter(function(g){ return !g.del });
+    var live=tous.filter(function(g){
+      return !mots.length || hit(mots,[g.name,g.chief,g.desc]);
+    }).sort(parNom);
+
+    v.querySelector("#gcnt").textContent = !tous.length ? "Aucun groupe pour l’instant."
+      : mots.length ? live.length+" sur "+tous.length+" groupe"+(tous.length>1?"s":"")+"."
+      : tous.length+" groupe"+(tous.length>1?"s":"")+" au registre.";
+
+    var h="";
+    if(!live.length){
+      h='<div class="qvide">'+(tous.length?"Aucun groupe ne répond à cette recherche."
+        :"Fonde un premier groupe pour commencer.")+"</div>";
+    }else{
+      h='<div class="wlist">';
+      live.forEach(function(g){
+        var n=grpMembres(g.id), ng=grpGens(g.id);
+        h+='<div class="wrow" data-open="'+esc(g.id)+'">'
+         +'<span class="gdot" style="background:'+esc(g.color)+'"></span>'
+         +'<span class="tx"><span class="t1">'+esc(g.name||"Sans nom")+"</span>"
+         +'<span class="t2">'+(n?n+" repère"+(n>1?"s":""):"aucun repère")
+         +(ng?" · "+ng+" personne"+(ng>1?"s":""):"")
+         +(g.chief?" · mené par "+esc(g.chief):"")+"</span></span>"
+         +'<button class="x" data-del="'+esc(g.id)+'" title="Dissoudre" aria-label="Dissoudre">×</button></div>';
+      });
+      h+="</div>";
+    }
+    v.querySelector("#glist").innerHTML=h;
+  }
+  draw();
+  q.addEventListener("input",draw);
+  q.focus();
+
   v.querySelector("[data-x]").onclick=function(){ v.remove() };
   v.addEventListener("click",function(e){
     if(e.target.closest("[data-new]")){ v.remove(); groupSheet(null); return }
@@ -1756,15 +2006,16 @@ function groupsListDialog(){
         if(n && !confirm("Dissoudre ce groupe ? "+n+" repère"+(n>1?"s retrouveront":" retrouvera")+" sa couleur d’origine.")) return;
         g.del=Date.now(); g.delBy=me||""; saveGroup(g);
       }
-      v.remove(); groupsListDialog(); return }
+      draw(); return }
     var o=e.target.closest("[data-open]");
     if(o){ v.remove(); groupSheet(o.dataset.open) }
   });
 }
 
-function groupSheet(id){
+function groupSheet(id,retour){
   var g=id?grpAt(id):null;
   var neuf=!g;
+  retour=retour||groupsListDialog;
   if(neuf) g={id:nid(),name:"",color:COLORS[0][0],chief:"",desc:"",by:me||"",t:Date.now()};
   var pal="";
   COLORS.forEach(function(c){
@@ -1776,7 +2027,26 @@ function groupSheet(id){
    +'<label class="fl">Mené par<input type="text" id="gChief" maxlength="60" placeholder="nom du meneur" value="'+esc(g.chief||"")+'"></label>'
    +'<div class="fl">Couleur<div class="pal gpal" id="gPal">'+pal+"</div></div>"
    +'<label class="fl">Description<textarea id="gDesc" class="fdesc" maxlength="2000" placeholder="Territoire, activités, alliances, rivalités…">'+esc(g.desc||"")+"</textarea></label>";
-  if(!neuf) body+='<div class="fhist"><span class="fhr">'+grpMembres(g.id)+" repère(s) rattaché(s) · ouvert par "+esc(g.by||"?")+" · "+fmtAgo(g.t)+"</span></div>";
+
+  if(!neuf){
+    var mbr=people.filter(function(p){ return !p.del && p.grp===g.id }).sort(parNom);
+    body+='<div class="fhist"><span class="fhl">Membres</span>';
+    if(mbr.length){
+      body+='<div class="wlist lite">';
+      mbr.forEach(function(p){
+        var S=PSTATUS[p.st||"vivant"]||PSTATUS.vivant;
+        body+='<div class="wrow" data-pers="'+esc(p.id)+'">'
+         +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
+         +'<span class="tx"><span class="t1">'+esc(p.name||"Sans nom")
+         +(persRecherchee(p.id)?' <i class="rech">recherché</i>':"")+"</span>"
+         +'<span class="t2">'+esc(p.job||"sans métier connu")+"</span></span></div>";
+      });
+      body+="</div>";
+    }else body+='<span class="fhr">Aucune personne rattachée.</span>';
+    body+="</div>";
+    body+='<div class="fhist"><span class="fhr">'+grpMembres(g.id)+" repère(s) rattaché(s) · ouvert par "
+      +esc(g.by||"?")+" · "+fmtAgo(g.t)+"</span></div>";
+  }
 
   var v=dialog(neuf?"Nouveau groupe":"Fiche de groupe",body,
     '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
@@ -1788,22 +2058,34 @@ function groupSheet(id){
     b.setAttribute("data-on","1");
   });
   v.querySelector("#gName").focus();
-  v.querySelector("[data-x]").onclick=function(){ v.remove(); groupsListDialog() };
-  v.querySelector("[data-o]").onclick=function(){
+
+  function lire(){
     var nom=v.querySelector("#gName").value.trim();
-    if(!nom){ toast("Il faut au moins un nom","bad"); return }
+    if(!nom){ toast("Il faut au moins un nom","bad"); return false }
     g.name=nom; g.color=choisie;
     g.chief=v.querySelector("#gChief").value.trim();
     g.desc =v.querySelector("#gDesc").value.trim();
+    return true;
+  }
+
+  v.querySelector("[data-x]").onclick=function(){ v.remove(); retour() };
+  v.querySelector("[data-o]").onclick=function(){
+    if(!lire())return;
     saveGroup(g);
-    v.remove(); groupsListDialog();
+    v.remove(); retour();
     toast(neuf?"Groupe créé":"Groupe mis à jour","ok");
   };
+  v.addEventListener("click",function(e){
+    var m=e.target.closest("[data-pers]");
+    if(m){ if(!lire())return; saveGroup(g); v.remove();
+      personSheet(m.dataset.pers,function(){ groupSheet(g.id,retour) }) }
+  });
 }
 
 /* ══ Avis de recherche ═══════════════════════════════════════
    Une collection à part des annotations : un avis concerne une
-   personne, pas un point de la carte.                          */
+   personne, pas un point de la carte. Quand cette personne a une
+   fiche au registre, l'avis s'y raccroche par pid.              */
 var wanted=[];
 var WSTATUS={
   recherche:{n:"Recherché", c:"#B3332B"},
@@ -1813,6 +2095,8 @@ var WSTATUS={
 };
 function wantedAt(id){ for(var i=0;i<wanted.length;i++) if(wanted[i].id===id) return wanted[i]; return null }
 function nbRecherches(){ var n=0; wanted.forEach(function(w){ if(!w.del&&(w.st||"recherche")==="recherche")n++ }); return n }
+/* La fiche liée, si elle existe encore. */
+function avisPers(w){ var p=w.pid?persAt(w.pid):null; return (p&&!p.del)?p:null }
 
 function saveWanted(w){
   var i,f=false;
@@ -1823,23 +2107,61 @@ function saveWanted(w){
 }
 
 function wantedListDialog(){
-  var live=wanted.filter(function(w){return !w.del});
-  var body='<div class="wtop"><p>'+(live.length?live.length+" avis au registre.":"Aucun avis pour l’instant.")
-    +'</p><button class="btn pri" data-new>Nouvel avis</button></div>';
-  if(live.length){
-    body+='<div class="wlist">';
-    live.forEach(function(w){
-      var S=WSTATUS[w.st||"recherche"]||WSTATUS.recherche;
-      body+='<div class="wrow" data-open="'+esc(w.id)+'">'
-        +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
-        +'<span class="tx"><span class="t1">'+esc(w.name||"Sans nom")+"</span>"
-        +'<span class="t2">'+(w.grp?esc(w.grp)+" · ":"")+esc(w.crime||"motif non précisé")
-        +(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")+"</span></span>"
-        +'<button class="x" data-del="'+esc(w.id)+'" title="Retirer" aria-label="Retirer">×</button></div>';
-    });
-    body+="</div>";
-  }
+  var fopts='<option value="">Tous les états</option>';
+  for(var k in WSTATUS) fopts+='<option value="'+k+'">'+WSTATUS[k].n+"</option>";
+  var body='<div class="wtop"><p id="wcnt"></p><button class="btn pri" data-new>Nouvel avis</button></div>'
+   +'<div class="wfind">'
+   +'<svg class="qic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">'
+   +'<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/><path d="M16.2 16.2 21 21"/></svg>'
+   +'<input type="text" id="wq" maxlength="40" placeholder="Nom, bande, motif, prime…">'
+   +'<select id="wf" aria-label="État">'+fopts+"</select></div>"
+   +'<div id="wlistbox"></div>';
   var v=dialog("Avis de recherche",body,'<button class="btn pri" data-x>Fermer</button>');
+  v.dataset.esc="1";
+  var q=v.querySelector("#wq"), f=v.querySelector("#wf");
+
+  function draw(){
+    var mots=qWords(q.value), etat=f.value, tous=wanted.filter(function(w){ return !w.del });
+    var live=tous.filter(function(w){
+      if(etat && (w.st||"recherche")!==etat) return false;
+      if(!mots.length) return true;
+      var P=avisPers(w);
+      return hit(mots,[w.name,w.grp,w.crime,w.bounty,w.seen,w.desc,
+                       P?P.alias:"", P?P.job:"", P?grpNom(P.grp):""]);
+    });
+
+    v.querySelector("#wcnt").textContent = !tous.length ? "Aucun avis pour l’instant."
+      : (mots.length||etat) ? live.length+" sur "+tous.length+" avis."
+      : tous.length+" avis au registre.";
+
+    var h="";
+    if(!live.length){
+      h='<div class="qvide">'+(tous.length?"Aucun avis ne répond à cette recherche."
+        :"Ouvre un premier avis pour commencer.")+"</div>";
+    }else{
+      h='<div class="wlist">';
+      live.forEach(function(w){
+        var S=WSTATUS[w.st||"recherche"]||WSTATUS.recherche, P=avisPers(w);
+        var nom=P?P.name:(w.name||"Sans nom");
+        var app=P?grpNom(P.grp):(w.grp||"");
+        h+='<div class="wrow" data-open="'+esc(w.id)+'">'
+         +'<span class="wst" style="background:'+S.c+'">'+esc(S.n)+"</span>"
+         +'<span class="tx"><span class="t1">'+esc(nom)
+         +(P&&P.alias?' <i class="alias">dit '+esc(P.alias)+"</i>":"")
+         +(P?' <i class="fic">fiche</i>':"")+"</span>"
+         +'<span class="t2">'+(app?esc(app)+" · ":"")+esc(w.crime||"motif non précisé")
+         +(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")+"</span></span>"
+         +'<button class="x" data-del="'+esc(w.id)+'" title="Retirer" aria-label="Retirer">×</button></div>';
+      });
+      h+="</div>";
+    }
+    v.querySelector("#wlistbox").innerHTML=h;
+  }
+  draw();
+  q.addEventListener("input",draw);
+  f.addEventListener("change",draw);
+  q.focus();
+
   v.querySelector("[data-x]").onclick=function(){ v.remove() };
   v.addEventListener("click",function(e){
     if(e.target.closest("[data-new]")){ v.remove(); wantedSheet(null); return }
@@ -1847,19 +2169,38 @@ function wantedListDialog(){
     if(d){ e.stopPropagation();
       var w=wantedAt(d.dataset.del);
       if(w){ w.del=Date.now(); w.delBy=me||""; saveWanted(w) }
-      v.remove(); wantedListDialog(); return }
+      draw(); return }
     var o=e.target.closest("[data-open]");
     if(o){ v.remove(); wantedSheet(o.dataset.open) }
   });
 }
 
-function wantedSheet(id){
+function wantedSheet(id,retour,preset){
   var w=id?wantedAt(id):null;
   var neuf=!w;
-  if(neuf) w={id:nid(),name:"",grp:"",crime:"",bounty:"",seen:"",desc:"",st:"recherche",by:me||"",t:Date.now()};
+  retour=retour||wantedListDialog;
+  if(neuf){
+    w={id:nid(),name:"",pid:"",grp:"",crime:"",bounty:"",seen:"",desc:"",st:"recherche",by:me||"",t:Date.now()};
+    if(preset&&preset.pid){
+      var P0=persAt(preset.pid);
+      if(P0){ w.pid=P0.id; w.name=P0.name; w.grp=grpNom(P0.grp) }
+    }
+  }
   var opts="";
   for(var k in WSTATUS) opts+='<option value="'+k+'"'+((w.st||"recherche")===k?" selected":"")+">"+WSTATUS[k].n+"</option>";
+
+  function persOpts(sel){
+    var o='<option value="">— aucune fiche liée —</option>';
+    people.filter(function(x){ return !x.del }).sort(parNom).forEach(function(x){
+      o+='<option value="'+esc(x.id)+'"'+(sel===x.id?" selected":"")+">"+esc(x.name||"Sans nom")
+        +(x.alias?" — dit "+esc(x.alias):"")+"</option>";
+    });
+    return o;
+  }
+
   var body=""
+   +'<label class="fl">Fiche de personne<select id="wPid">'+persOpts(w.pid)+"</select></label>"
+   +'<div class="lkrow" id="wLk"></div>'
    +'<label class="fl">Nom<input type="text" id="wName" maxlength="80" value="'+esc(w.name||"")+'"></label>'
    +'<div class="wgrid">'
    +'<label class="fl">Appartenance<input type="text" id="wGrp" maxlength="60" placeholder="bande, famille…" value="'+esc(w.grp||"")+'"></label>'
@@ -1873,22 +2214,189 @@ function wantedSheet(id){
 
   var v=dialog(neuf?"Nouvel avis de recherche":"Avis de recherche",body,
     '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
-  v.querySelector("#wName").focus();
-  v.querySelector("[data-x]").onclick=function(){ v.remove(); wantedListDialog() };
-  v.querySelector("[data-o]").onclick=function(){
-    var nom=v.querySelector("#wName").value.trim();
-    if(!nom){ toast("Il faut au moins un nom","bad"); return }
-    w.name=nom;
-    w.grp   =v.querySelector("#wGrp").value.trim();
+  var sel=v.querySelector("#wPid"), nom=v.querySelector("#wName"), app=v.querySelector("#wGrp");
+
+  /* Tant qu'un avis est lié, il ne s'écarte pas de sa fiche : le nom
+     et l'appartenance en sont recopiés, pas ressaisis. */
+  function majLien(){
+    var P=sel.value?persAt(sel.value):null;
+    if(P && !P.del){
+      nom.value=P.name||""; app.value=grpNom(P.grp);
+      nom.disabled=true; app.disabled=true;
+      v.querySelector("#wLk").innerHTML='<span class="lkn">Nom et appartenance suivent la fiche.</span>'
+       +'<button type="button" class="lk" data-openp>Ouvrir la fiche</button>';
+    }else{
+      nom.disabled=false; app.disabled=false;
+      v.querySelector("#wLk").innerHTML='<span class="lkn">Avis au nom libre, sans fiche au registre.</span>'
+       +'<button type="button" class="lk" data-mkp>Créer la fiche</button>';
+    }
+  }
+  majLien();
+  sel.addEventListener("change",majLien);
+  if(!nom.disabled) nom.focus(); else v.querySelector("#wCrime").focus();
+
+  function lire(){
+    var P=sel.value?persAt(sel.value):null;
+    if(P && !P.del){ w.pid=P.id; w.name=P.name||""; w.grp=grpNom(P.grp) }
+    else{
+      w.pid="";
+      var n=nom.value.trim();
+      if(!n){ toast("Il faut au moins un nom","bad"); return false }
+      w.name=n; w.grp=app.value.trim();
+    }
     w.st    =v.querySelector("#wSt").value;
     w.crime =v.querySelector("#wCrime").value.trim();
     w.bounty=v.querySelector("#wBounty").value.trim();
     w.seen  =v.querySelector("#wSeen").value.trim();
     w.desc  =v.querySelector("#wDesc").value.trim();
+    return true;
+  }
+
+  v.querySelector("[data-x]").onclick=function(){ v.remove(); retour() };
+  v.querySelector("[data-o]").onclick=function(){
+    if(!lire())return;
     saveWanted(w);
-    v.remove(); wantedListDialog();
+    v.remove(); retour();
     toast(neuf?"Avis ouvert":"Avis mis à jour","ok");
   };
+  v.addEventListener("click",function(e){
+    if(e.target.closest("[data-openp]")){
+      if(!lire())return; saveWanted(w); v.remove();
+      personSheet(w.pid,function(){ wantedSheet(w.id,retour) }); return }
+    if(e.target.closest("[data-mkp]")){
+      /* Ouvrir la fiche que cet avis appelle : même nom, même bande. */
+      var n=nom.value.trim();
+      if(!n){ toast("Écris d’abord un nom","bad"); return }
+      var gid="", cible=norm(app.value.trim());
+      if(cible) groups.forEach(function(g){ if(!g.del && norm(g.name)===cible) gid=g.id });
+      var p={id:nid(),name:n,alias:"",grp:gid,job:"",st:"vivant",desc:"",by:me||"",t:Date.now()};
+      savePerson(p);
+      sel.innerHTML=persOpts(p.id); majLien();
+      toast("Fiche créée pour "+n,"ok");
+    }
+  });
+}
+
+/* ══ La barre de recherche ═══════════════════════════════════
+   Repères, personnes, groupes et avis répondent tous à la même
+   requête. Un résultat s'ouvre, ou s'atteint sur la carte.     */
+function searchDialog(q0){
+  var body='<div class="qbox">'
+   +'<svg class="qic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">'
+   +'<path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/><path d="M16.2 16.2 21 21"/></svg>'
+   +'<input type="text" id="qq" maxlength="60" placeholder="Un nom, un lieu, un groupe, un motif…" value="'+esc(q0||"")+'"></div>'
+   +'<div class="qres" id="qres"></div>';
+  var v=dialog("Rechercher",body,
+    '<span class="qhint">↑ ↓ pour parcourir · Entrée pour ouvrir</span>'
+   +'<button class="btn pri" data-x>Fermer</button>');
+  v.dataset.esc="1";
+  var q=v.querySelector("#qq"), res=v.querySelector("#qres"), touches=[], sel=0;
+
+  function trouve(mots){
+    var out=[];
+    people.filter(function(p){ return !p.del })
+      .filter(function(p){ return hit(mots,[p.name,p.alias,p.job,p.desc,grpNom(p.grp)]) })
+      .sort(parNom).forEach(function(p){
+        var g=p.grp?grpAt(p.grp):null, vivg=(g&&!g.del);
+        out.push({t:"pers",id:p.id,sec:"Personnes",dot:vivg?g.color:"#3C3C42",
+          t1:esc(p.name||"Sans nom")+(persRecherchee(p.id)?' <i class="rech">recherché</i>':""),
+          t2:(vivg?esc(g.name)+" · ":"")+esc(p.job||"sans métier connu")});
+      });
+    groups.filter(function(g){ return !g.del })
+      .filter(function(g){ return hit(mots,[g.name,g.chief,g.desc]) })
+      .sort(parNom).forEach(function(g){
+        var ng=grpGens(g.id), nr=grpMembres(g.id);
+        out.push({t:"grp",id:g.id,sec:"Groupes",dot:g.color,
+          t1:esc(g.name||"Sans nom"),
+          t2:(ng?ng+" personne"+(ng>1?"s":""):"aucune personne")+" · "
+             +(nr?nr+" repère"+(nr>1?"s":""):"aucun repère")
+             +(g.chief?" · mené par "+esc(g.chief):"")});
+      });
+    wanted.filter(function(w){ return !w.del })
+      .filter(function(w){ var P=avisPers(w);
+        return hit(mots,[w.name,w.grp,w.crime,w.bounty,w.seen,w.desc,P?P.alias:""]) })
+      .forEach(function(w){
+        var S=WSTATUS[w.st||"recherche"]||WSTATUS.recherche, P=avisPers(w);
+        out.push({t:"wanted",id:w.id,sec:"Avis de recherche",badge:S,
+          t1:esc(P?P.name:(w.name||"Sans nom"))+(P?' <i class="fic">fiche</i>':""),
+          t2:esc(w.crime||"motif non précisé")+(w.bounty?' · <b>'+esc(w.bounty)+"</b>":"")});
+      });
+    allAnns.filter(function(a){ return !a.del })
+      .filter(function(a){ var C=CATS[a.cat]||null;
+        return hit(mots,[a.label,a.desc,a.own,grpNom(a.grp),
+                         a.kind==="pin"&&C?C.n:KINDS[a.kind]]) })
+      .forEach(function(a){
+        var C=CATS[a.cat]||null, p=anchor(a);
+        out.push({t:"ann",id:a.id,sec:"Repères",dot:effColor(a),
+          t1:esc(a.label||(a.kind==="pin"&&C?C.n:KINDS[a.kind])),
+          t2:"<b>"+coordOf(p[0],p[1])+"</b> · "
+             +esc(MAPS[a.m||"monde"]?MAPS[a.m||"monde"].n:"Monde")+" · "
+             +esc(a.kind==="pin"&&C?C.n:KINDS[a.kind])});
+      });
+    return out;
+  }
+
+  function draw(){
+    var mots=qWords(q.value);
+    if(!mots.length){
+      touches=[]; sel=0;
+      res.innerHTML='<div class="qvide">Tape quelques lettres : tout le registre répond — repères, personnes, groupes et avis.</div>';
+      return;
+    }
+    touches=trouve(mots);
+    if(!touches.length){
+      sel=0; res.innerHTML='<div class="qvide">Rien de ce nom sur cette carte.</div>'; return;
+    }
+    if(sel>=touches.length) sel=touches.length-1;
+    var h="", sec=null;
+    touches.forEach(function(o,i){
+      if(o.sec!==sec){ sec=o.sec; h+='<div class="wsec">'+esc(sec)+"</div>" }
+      h+='<div class="wrow" data-i="'+i+'"'+(i===sel?' data-sel="1"':"")+">"
+       +(o.badge?'<span class="wst" style="background:'+o.badge.c+'">'+esc(o.badge.n)+"</span>"
+                :'<span class="gdot" style="background:'+esc(o.dot||"#3C3C42")+'"></span>')
+       +'<span class="tx"><span class="t1">'+o.t1+"</span>"
+       +'<span class="t2">'+o.t2+"</span></span></div>";
+    });
+    res.innerHTML=h;
+  }
+
+  function bouge(d){
+    if(!touches.length)return;
+    sel=clamp(sel+d,0,touches.length-1);
+    [].forEach.call(res.querySelectorAll(".wrow"),function(r){
+      if(+r.dataset.i===sel){ r.setAttribute("data-sel","1");
+        if(r.scrollIntoView) r.scrollIntoView({block:"nearest"}) }
+      else r.removeAttribute("data-sel");
+    });
+  }
+
+  function ouvre(i){
+    var o=touches[i]; if(!o)return;
+    var q1=q.value;
+    v.remove();
+    if(o.t==="pers")   return personSheet(o.id,function(){ searchDialog(q1) });
+    if(o.t==="grp")    return groupSheet(o.id,function(){ searchDialog(q1) });
+    if(o.t==="wanted") return wantedSheet(o.id,function(){ searchDialog(q1) });
+    var a=fullAnn(o.id); if(!a)return;
+    if((a.m||"monde")!==curMap) setMap(a.m||"monde");
+    var pt=anchor(a);
+    flyTo(pt[0],pt[1]);
+    hot(a.id);
+  }
+
+  draw();
+  q.focus(); q.select();
+  q.addEventListener("input",function(){ sel=0; draw() });
+  q.addEventListener("keydown",function(e){
+    if(e.key==="ArrowDown"){ e.preventDefault(); bouge(1) }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); bouge(-1) }
+    else if(e.key==="Enter"){ e.preventDefault(); ouvre(sel) }
+    else if(e.key==="Escape"){ e.preventDefault(); v.remove() }
+  });
+  res.addEventListener("click",function(e){
+    var r=e.target.closest("[data-i]"); if(r) ouvre(+r.dataset.i);
+  });
+  v.querySelector("[data-x]").onclick=function(){ v.remove() };
 }
 
 function helpDialog(){
