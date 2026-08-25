@@ -435,6 +435,10 @@ button{background:none;border:0;cursor:pointer}
 .wrow:hover{background:rgba(255,255,255,.045)}
 .wst{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#fff;
   padding:3px 8px;border-radius:100px;white-space:nowrap;flex:0 0 auto}
+.wrow .ic{width:20px;height:20px;flex:0 0 20px;border-radius:50%;
+  display:grid;place-items:center}
+.wrow .ic svg{width:12px;height:12px;fill:none;stroke:#FBF3E1;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
 .wrow .tx{min-width:0;flex:1}
 .wrow .t1{display:block;font-size:13.5px;font-weight:500;color:var(--ink)}
 .wrow .t2{display:block;font-size:11.5px;color:var(--faint);
@@ -997,7 +1001,7 @@ function annMarkup(a){
   if(a.cat)  at+=' data-cat="'+esc(a.cat)+'"';
   at+=' data-m="'+esc(a.m||"monde")+'"';
   if(a.grp)  at+=' data-grp="'+esc(a.grp)+'" data-eff="'+esc(col)+'"';
-  if(a.desc||a.own) at+=' data-fiche="1"';
+  if(a.desc||a.own||a.oid) at+=' data-fiche="1"';
   if(a.label)at+=' data-label="'+esc(a.label)+'"';
   if(a.by)   at+=' data-by="'+esc(a.by)+'"';
   if(a.t)    at+=' data-t="'+a.t+'"';
@@ -1769,6 +1773,9 @@ function shareMenu(btn){
 /* ══ Fiche de lieu ═══════════════════════════════════════════
    Un repère cesse d'être une étiquette : il porte une description,
    son détenteur, et la trace de ses modifications.               */
+/* Les champs d'une fiche de lieu, tels qu'on les nomme aux lecteurs. */
+var CHAMPS={label:"nom",own:"tenu par",oid:"fiche liée",desc:"description",grp:"groupe"};
+
 function sheetDialog(id){
   var a=fullAnn(id); if(!a)return;
   var C=CATS[a.cat]||null, p=anchor(a);
@@ -1785,6 +1792,8 @@ function sheetDialog(id){
    +groups.filter(function(g){return !g.del}).map(function(g){
        return '<option value="'+esc(g.id)+'"'+(a.grp===g.id?" selected":"")+">"+esc(g.name)+"</option>" }).join("")
    +"</select></label>"
+   +'<label class="fl">Fiche de personne<select id="fOid">'+persOptions(a.oid,"— libre —")+"</select></label>"
+   +'<div class="lkrow" id="fLk"></div>'
    +'<label class="fl">Tenu par<input type="text" id="fOwn" maxlength="60" placeholder="précision libre…" value="'+esc(a.own||"")+'"></label>'
    +'<label class="fl">Description<textarea id="fDesc" class="fdesc" maxlength="2000" placeholder="Ce qu\'on y trouve, ce qui s\'y est passé, qui le fréquente…">'+esc(a.desc||"")+"</textarea></label>";
 
@@ -1792,7 +1801,7 @@ function sheetDialog(id){
   if(h.length){
     body+='<div class="fhist"><span class="fhl">Modifications</span>';
     h.slice(0,8).forEach(function(r){
-      var champs=Object.keys(r.was||{}).join(", ")||"—";
+      var champs=Object.keys(r.was||{}).map(function(c){ return CHAMPS[c]||c }).join(", ")||"—";
       body+='<span class="fhr">'+esc(r.by||"quelqu'un")+" · "+fmtAgo(r.t)+" · "+esc(champs)+"</span>";
     });
     body+="</div>";
@@ -1801,19 +1810,62 @@ function sheetDialog(id){
   var v=dialog("Fiche de lieu",body,
     '<button class="btn" data-x>Annuler</button><button class="btn pri" data-o>Enregistrer</button>');
   var nom=v.querySelector("#fNom");
+  var sel=v.querySelector("#fOid"), own=v.querySelector("#fOwn");
+
+  /* Tant qu'un lieu est rattaché à une fiche, « tenu par » en est
+     recopié : la personne change de nom, le lieu suit. */
+  function majLien(){
+    var P=sel.value?persAt(sel.value):null;
+    if(P && !P.del){
+      own.value=P.name||""; own.disabled=true;
+      v.querySelector("#fLk").innerHTML='<span class="lkn">Suit la fiche de personne.</span>'
+       +'<button type="button" class="lk" data-openp>Ouvrir la fiche</button>';
+    }else{
+      own.disabled=false;
+      v.querySelector("#fLk").innerHTML='<span class="lkn">Mention libre, sans fiche au registre.</span>'
+       +'<button type="button" class="lk" data-mkp>Créer la fiche</button>';
+    }
+  }
+  majLien();
+  sel.addEventListener("change",majLien);
   nom.focus();
-  v.querySelector("[data-x]").onclick=function(){ v.remove() };
-  v.querySelector("[data-o]").onclick=function(){
+
+  function lire(){
     var kv={};
-    var n2=nom.value.trim(), o2=v.querySelector("#fOwn").value.trim(), d2=v.querySelector("#fDesc").value.trim();
+    var P=sel.value?persAt(sel.value):null;
+    var n2=nom.value.trim(), d2=v.querySelector("#fDesc").value.trim();
     var g2=v.querySelector("#fGrp").value;
+    var i2=(P&&!P.del)?P.id:"", o2=(P&&!P.del)?(P.name||""):own.value.trim();
     if(n2!==(a.label||"")) kv.label=n2;
     if(o2!==(a.own||""))   kv.own=o2;
+    if(i2!==(a.oid||""))   kv.oid=i2;
     if(d2!==(a.desc||""))  kv.desc=d2;
     if(g2!==(a.grp||""))   kv.grp=g2;
+    return kv;
+  }
+
+  v.querySelector("[data-x]").onclick=function(){ v.remove() };
+  v.querySelector("[data-o]").onclick=function(){
+    var kv=lire();
     v.remove();
     if(Object.keys(kv).length){ setAttrs(id,kv); toast("Fiche enregistrée","ok") }
   };
+  v.addEventListener("click",function(e){
+    if(e.target.closest("[data-openp]")){
+      var kv=lire(); if(Object.keys(kv).length) setAttrs(id,kv);
+      var pid=sel.value; v.remove(); personSheet(pid); return }
+    if(e.target.closest("[data-mkp]")){
+      /* Ouvrir la fiche que ce lieu appelle : même nom, et le groupe
+         du lieu s'il en a un. */
+      var n=own.value.trim();
+      if(!n){ toast("Écris d’abord un nom", "bad"); return }
+      var p={id:nid(),name:n,alias:"",grp:v.querySelector("#fGrp").value||"",job:"",
+             st:"vivant",desc:"",by:me||"",t:Date.now()};
+      savePerson(p);
+      sel.innerHTML=persOptions(p.id,"— libre —"); majLien();
+      toast("Fiche créée pour "+n,"ok");
+    }
+  });
 }
 
 /* ══ Recherche ═══════════════════════════════════════════════
@@ -1836,6 +1888,21 @@ function hit(mots,champs){
 }
 function grpNom(id){ var g=id?grpAt(id):null; return (g&&!g.del)?(g.name||""):"" }
 function parNom(a,b){ return (a.name||"").localeCompare(b.name||"") }
+/* Le menu des fiches de personnes, partagé par tout ce qui s'y rattache :
+   un avis de recherche, un lieu tenu par quelqu'un. */
+function persOptions(sel,vide){
+  var o='<option value="">'+esc(vide||"— aucune fiche liée —")+"</option>";
+  people.filter(function(x){ return !x.del }).sort(parNom).forEach(function(x){
+    o+='<option value="'+esc(x.id)+'"'+(sel===x.id?" selected":"")+">"+esc(x.name||"Sans nom")
+      +(x.alias?" — dit "+esc(x.alias):"")+"</option>";
+  });
+  return o;
+}
+/* Les lieux qu'une personne tient. */
+function persLieux(id){
+  if(!id) return [];
+  return allAnns.filter(function(a){ return !a.del && a.oid===id });
+}
 
 /* ══ Personnes ═══════════════════════════════════════════════
    Qui peuple la carte. Chacune peut être rattachée à un groupe,
@@ -1877,6 +1944,7 @@ function savePerson(p){
   if(!f) people.push(p);
   cloudPut("/people/"+p.id,p);
   syncAvis(p);
+  syncLieux(p);
   renderBar();
 }
 /* Un avis lié porte toujours le nom et l'appartenance de sa fiche :
@@ -1887,6 +1955,15 @@ function syncAvis(p){
     if(w.name===p.name && w.grp===gn) return;
     w.name=p.name; w.grp=gn;
     cloudPut("/wanted/"+w.id,w);
+  });
+}
+
+/* Les lieux rattachés portent toujours le nom de leur tenancier. */
+function syncLieux(p){
+  persLieux(p.id).forEach(function(a){
+    if(a.own===p.name) return;
+    a.own=p.name;
+    cloudPut("/anns/"+a.id,a);
   });
 }
 
@@ -1977,14 +2054,30 @@ function peopleListDialog(){
     if(d){ e.stopPropagation();
       var p=persAt(d.dataset.del);
       if(p){
-        var na=persAvis(p.id).length;
-        if(na && !confirm("Retirer cette fiche ? "+na+" avis de recherche "+(na>1?"perdront leur lien.":"perdra son lien."))) return;
+        var na=persAvis(p.id).length, nl=persLieux(p.id).length;
+        if(na||nl){
+          var bouts=[];
+          if(na) bouts.push(na+" avis de recherche");
+          if(nl) bouts.push(nl+" lieu"+(nl>1?"x":""));
+          if(!confirm("Retirer cette fiche ? "+bouts.join(" et ")+" "
+             +((na+nl)>1?"perdront leur lien.":"perdra son lien."))) return;
+        }
         p.del=Date.now(); p.delBy=me||""; savePerson(p);
       }
       draw(); return }
     var o=e.target.closest("[data-open]");
     if(o){ v.remove(); personSheet(o.dataset.open) }
   });
+}
+
+/* Rejoindre un lieu depuis une fiche : on y va vraiment sur la carte,
+   puis on ouvre sa fiche par-dessus. */
+function allerAuLieu(id){
+  var a=fullAnn(id); if(!a)return;
+  if((a.m||"monde")!==curMap) setMap(a.m||"monde");
+  var pt=anchor(a);
+  flyTo(pt[0],pt[1]); hot(a.id);
+  sheetDialog(id);
 }
 
 function personSheet(id,retour){
@@ -2023,6 +2116,24 @@ function personSheet(id,retour){
       body+="</div>";
     }else body+='<span class="fhr">Aucun avis à son nom.</span>';
     body+='<button type="button" class="lk" data-newavis>Ouvrir un avis à son nom</button></div>';
+
+    var lx=persLieux(p.id);
+    body+='<div class="fhist"><span class="fhl">Lieux tenus</span>';
+    if(lx.length){
+      body+='<div class="wlist lite">';
+      lx.forEach(function(a){
+        var C=CATS[a.cat]||null, pt=anchor(a), M=MAPS[a.m||"monde"];
+        body+='<div class="wrow" data-lieu="'+esc(a.id)+'">'
+         +'<span class="ic" style="background:'+esc(effColor(a))+'">'
+         +(C?'<svg viewBox="-9 -9 18 18"><path d="'+C.d+'"/></svg>':"")+"</span>"
+         +'<span class="tx"><span class="t1">'
+         +esc(a.label||(a.kind==="pin"&&C?C.n:KINDS[a.kind]))+"</span>"
+         +'<span class="t2"><b>'+coordOf(pt[0],pt[1])+"</b> · "
+         +esc(M?M.n:"Monde")+"</span></span></div>";
+      });
+      body+="</div>";
+    }else body+='<span class="fhr">Aucun lieu à son nom.</span>';
+    body+="</div>";
     body+='<div class="fhist"><span class="fhr">Fiche ouverte par '+esc(p.by||"?")+" · "+fmtAgo(p.t)+"</span></div>";
   }
 
@@ -2053,6 +2164,9 @@ function personSheet(id,retour){
   /* Passer aux avis, c'est quitter la fiche : on l'enregistre d'abord,
      pour ne rien perdre en chemin. */
   v.addEventListener("click",function(e){
+    var l=e.target.closest("[data-lieu]");
+    if(l){ if(!lire())return; savePerson(p); v.remove();
+      allerAuLieu(l.dataset.lieu); return }
     var a=e.target.closest("[data-avis]");
     if(a){ if(!lire())return; savePerson(p); v.remove();
       wantedSheet(a.dataset.avis,function(){ personSheet(p.id,retour) }); return }
@@ -2317,17 +2431,8 @@ function wantedSheet(id,retour,preset){
   var opts="";
   for(var k in WSTATUS) opts+='<option value="'+k+'"'+((w.st||"recherche")===k?" selected":"")+">"+WSTATUS[k].n+"</option>";
 
-  function persOpts(sel){
-    var o='<option value="">— aucune fiche liée —</option>';
-    people.filter(function(x){ return !x.del }).sort(parNom).forEach(function(x){
-      o+='<option value="'+esc(x.id)+'"'+(sel===x.id?" selected":"")+">"+esc(x.name||"Sans nom")
-        +(x.alias?" — dit "+esc(x.alias):"")+"</option>";
-    });
-    return o;
-  }
-
   var body=""
-   +'<label class="fl">Fiche de personne<select id="wPid">'+persOpts(w.pid)+"</select></label>"
+   +'<label class="fl">Fiche de personne<select id="wPid">'+persOptions(w.pid)+"</select></label>"
    +'<div class="lkrow" id="wLk"></div>'
    +'<label class="fl">Nom<input type="text" id="wName" maxlength="80" value="'+esc(w.name||"")+'"></label>'
    +'<div class="wgrid">'
@@ -2399,7 +2504,7 @@ function wantedSheet(id,retour,preset){
       if(cible) groups.forEach(function(g){ if(!g.del && norm(g.name)===cible) gid=g.id });
       var p={id:nid(),name:n,alias:"",grp:gid,job:"",st:"vivant",desc:"",by:me||"",t:Date.now()};
       savePerson(p);
-      sel.innerHTML=persOpts(p.id); majLien();
+      sel.innerHTML=persOptions(p.id); majLien();
       toast("Fiche créée pour "+n,"ok");
     }
   });
