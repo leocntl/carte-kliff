@@ -1,5 +1,5 @@
 <title>Carte de chasse de Kliff</title>
-<link id="fontlink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700;800&family=Cutive+Mono&family=Caveat:wght@500;600;700&display=swap">
+<link id="fontlink" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&family=Cutive+Mono&family=Caveat:wght@500;600;700&display=swap">
 <style id="appcss">
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -16,11 +16,26 @@ artifact-local{display:contents}
      C'est ce qui distingue une matière d'un aplat. */
   --lit:rgba(255,255,255,.06);
   --shade:rgba(0,0,0,.5);
-  --sans:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
-  --disp:"IM Fell English SC",Georgia,serif;
-  --mono:"Cutive Mono",ui-monospace,Consolas,monospace;
+  /* L'interface parle d'aujourd'hui ; la carte, elle, garde sa main
+     d'époque. --hand pour l'écriture posée sur le terrain, --plume
+     pour le lettrage du quadrillage : ces deux-là ne bougent pas. */
+  --sans:"Inter","Segoe UI",system-ui,sans-serif;
+  --disp:"Space Grotesk","Inter","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
   --hand:"Caveat","Segoe Script","Bradley Hand",cursive;
-  --r:3px;
+  --plume:"Cutive Mono",ui-monospace,Consolas,monospace;
+  --r:3px; --rl:14px;
+  /* Le verre : un fond translucide, un flou d'arrière-plan, un liseré
+     de lumière sur l'arête haute. La carte reste visible dessous, ce
+     qui donne la profondeur. Plus le texte est dense, plus le fond est
+     opaque — la lisibilité passe avant l'effet. */
+  --verre :rgba(16,16,19,.72);
+  --verre2:rgba(17,17,20,.82);
+  --arete :rgba(255,255,255,.10);
+  --arete2:rgba(255,255,255,.06);
+  --flou  :saturate(1.5) blur(22px);
+  --relief:0 18px 50px rgba(0,0,0,.55), 0 2px 10px rgba(0,0,0,.38);
+  --doux  :.18s cubic-bezier(.2,.8,.2,1);
   /* Grain de cuir, en fond de tous les panneaux. */
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)' opacity='.055'/%3E%3C/svg%3E");
 }
@@ -36,24 +51,26 @@ button{background:none;border:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--brass);outline-offset:2px}
 ::selection{background:var(--brassg);color:var(--ink)}
 
-.app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
-.mid{flex:1;display:flex;min-height:0}
+/* La carte prend tout l'écran ; barre, rail et registre flottent
+   au-dessus d'elle. C'est cette superposition qui donne au flou
+   quelque chose à flouter. */
+.app{height:100dvh;position:relative;overflow:hidden}
+.mid{position:absolute;inset:0;z-index:1}
 
 /* ── Barre de titre ───────────────────────────── */
 .bar{
-  position:relative;z-index:3;
+  position:absolute;top:0;left:0;right:0;z-index:30;
   display:flex;align-items:center;gap:16px;
-  height:54px;flex:0 0 54px;padding:0 14px 0 20px;
-  background:var(--grain),linear-gradient(180deg,#2A2A2E 0%,#1A1A1D 44%,#131316 100%);
-  border-bottom:1px solid #000;
-  box-shadow:inset 0 1px 0 var(--lit), 0 1px 0 rgba(210,162,76,.15), 0 6px 20px rgba(0,0,0,.6);
+  height:60px;padding:0 16px 0 20px;
+  background:linear-gradient(180deg,rgba(13,13,15,.82),rgba(13,13,15,.62));
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border-bottom:1px solid var(--arete2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 10px 34px rgba(0,0,0,.34);
 }
 .brand{display:flex;align-items:baseline;gap:11px;min-width:0}
 .brand h1{
-  margin:0;font-family:var(--disp);font-weight:400;font-size:23px;
-  letter-spacing:.015em;color:#E2B863;white-space:nowrap;
-  /* Frappe typographique : creusé dans la plaque, pas posé dessus. */
-  text-shadow:0 1px 0 rgba(0,0,0,.75),0 -1px 0 rgba(255,225,170,.14);
+  margin:0;font-family:var(--disp);font-weight:600;font-size:19.5px;
+  letter-spacing:-.012em;color:#E7C077;white-space:nowrap;
 }
 .brand .sub{
   font-size:10px;letter-spacing:.22em;text-transform:uppercase;
@@ -91,9 +108,10 @@ button{background:none;border:0;cursor:pointer}
 .chip .pop{
   display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:40;
   min-width:172px;max-width:262px;padding:3px 0 6px;
-  background:var(--grain),linear-gradient(180deg,#212124,#161618);
-  border:1px solid #000;border-radius:var(--r);
-  box-shadow:inset 0 1px 0 var(--lit),0 14px 34px rgba(0,0,0,.72);
+  background:var(--verre2);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border:1px solid var(--arete);border-radius:12px;
+  box-shadow:0 18px 44px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
   white-space:normal;letter-spacing:normal;cursor:default;
 }
 .chip[data-pop]:hover .pop,.chip[data-pop]:focus-within .pop{display:block}
@@ -130,13 +148,16 @@ button{background:none;border:0;cursor:pointer}
 
 /* ── Rail d'outils ────────────────────────────── */
 .tools{
-  position:relative;z-index:2;
-  flex:0 0 62px;display:flex;flex-direction:column;align-items:center;gap:4px;
-  padding:11px 0;overflow-y:auto;scrollbar-width:thin;
-  background:var(--grain),linear-gradient(90deg,#1B1B1E 0%,#141416 62%,#101012 100%);
-  border-right:1px solid #000;
-  box-shadow:inset -1px 0 0 rgba(255,255,255,.03), 4px 0 16px rgba(0,0,0,.55);
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);z-index:25;
+  width:58px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 0;border-radius:var(--rl);
+  max-height:calc(100dvh - 150px);overflow-y:auto;scrollbar-width:none;
+  background:var(--verre);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border:1px solid var(--arete2);
+  box-shadow:var(--relief), inset 0 1px 0 rgba(255,255,255,.07);
 }
+.tools::-webkit-scrollbar{display:none}
 /* Filet gravé : une ombre puis une lumière, comme un trait au burin. */
 .tools .rule{width:28px;height:2px;margin:8px 0;flex:0 0 2px;border-radius:2px;
   background:linear-gradient(180deg,#000 0 1px,rgba(255,255,255,.055) 1px 2px)}
@@ -183,7 +204,7 @@ button{background:none;border:0;cursor:pointer}
 
 /* ── Scène ────────────────────────────────────── */
 .stage{
-  flex:1;position:relative;overflow:hidden;min-width:0;
+  position:absolute;inset:0;overflow:hidden;
   background:radial-gradient(125% 95% at 50% 40%,#232327 0%,#111113 52%,var(--ground2) 100%);
   cursor:grab;touch-action:none;
 }
@@ -207,7 +228,7 @@ button{background:none;border:0;cursor:pointer}
 #gridg .maj{stroke:#7A2C1F;stroke-width:1.1;opacity:.8}
 #gridg .glab{transform-box:view-box;transform-origin:0 0;
   transform:translate(calc(var(--x)*1px),calc(var(--y)*1px)) scale(var(--iz,1));
-  font-family:var(--mono);font-size:12px;text-anchor:middle;
+  font-family:var(--plume);font-size:12px;text-anchor:middle;
   fill:#7A2C1F;stroke:#F2E6CC;stroke-width:2.6px;paint-order:stroke fill;opacity:.95}
 
 #ink .an{pointer-events:auto}
@@ -242,11 +263,13 @@ button{background:none;border:0;cursor:pointer}
 /* ── HUD ──────────────────────────────────────── */
 /* Bandeau d'instrument : boîtier sombre, arêtes nettes. */
 .hud{
-  position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:7px;
-  padding:6px 7px;border-radius:var(--r);
-  background:linear-gradient(180deg,rgba(38,38,42,.94),rgba(16,16,18,.94));
-  border:1px solid #000;backdrop-filter:blur(8px);
-  box-shadow:inset 0 1px 0 var(--lit),0 8px 24px rgba(0,0,0,.62);
+  position:absolute;left:86px;bottom:16px;z-index:20;
+  display:flex;align-items:center;gap:7px;
+  padding:7px 10px;border-radius:100px;
+  background:var(--verre);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border:1px solid var(--arete2);
+  box-shadow:var(--relief), inset 0 1px 0 rgba(255,255,255,.07);
 }
 .hud button{width:29px;height:27px;display:grid;place-items:center;border-radius:2px;
   color:var(--dim);font-size:15px;line-height:1;transition:.12s}
@@ -261,16 +284,18 @@ button{background:none;border:0;cursor:pointer}
 .hud .lb{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:0 2px}
 
 /* ── Registre ─────────────────────────────────── */
-.panel{position:relative;z-index:2;
-  flex:0 0 300px;display:flex;flex-direction:column;min-height:0;
-  background:var(--grain),linear-gradient(270deg,#1B1B1E 0%,#141416 62%,#101012 100%);
-  border-left:1px solid #000;
-  box-shadow:inset 1px 0 0 rgba(255,255,255,.03), -4px 0 16px rgba(0,0,0,.55)}
+.panel{position:absolute;right:14px;top:74px;bottom:14px;width:306px;z-index:25;
+  display:flex;flex-direction:column;min-height:0;
+  border-radius:var(--rl);overflow:hidden;
+  background:var(--verre2);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border:1px solid var(--arete2);
+  box-shadow:var(--relief), inset 0 1px 0 rgba(255,255,255,.07)}
 .panel[data-hide="1"]{display:none}
 /* Intitulés de section : petites capitales espacées, sur filet gravé. */
 .ph{display:flex;align-items:baseline;gap:9px;padding:14px 15px 10px;
   border-bottom:1px solid #000;box-shadow:0 1px 0 rgba(255,255,255,.035)}
-.ph h2{margin:0;font-family:var(--disp);font-weight:400;font-size:15px;
+.ph h2{margin:0;font-family:var(--disp);font-weight:600;font-size:12.5px;
   letter-spacing:.13em;text-transform:uppercase;color:var(--brass)}
 .ph .n{font-family:var(--mono);font-size:12px;color:var(--faint);
   margin-left:auto;font-variant-numeric:tabular-nums}
@@ -310,7 +335,7 @@ button{background:none;border:0;cursor:pointer}
   max-height:45%;min-height:140px;border-top:1px solid #000;
   box-shadow:0 -1px 0 rgba(255,255,255,.035)}
 .nh{display:flex;align-items:baseline;gap:9px;padding:12px 15px 8px}
-.nh h3{margin:0;font-family:var(--disp);font-weight:400;font-size:15px;
+.nh h3{margin:0;font-family:var(--disp);font-weight:600;font-size:12.5px;
   letter-spacing:.13em;text-transform:uppercase;color:var(--brass)}
 .nh .n{font-family:var(--mono);font-size:12px;color:var(--faint);margin-left:auto}
 .nlist{flex:1;overflow-y:auto;scrollbar-width:thin;padding:0 0 4px}
@@ -338,11 +363,13 @@ button{background:none;border:0;cursor:pointer}
 #notes{display:none}
 
 /* ── Menu contextuel ──────────────────────────── */
-.menu{position:fixed;z-index:60;min-width:190px;max-height:calc(100vh - 24px);
-  overflow-y:auto;padding:5px;
-  background:linear-gradient(180deg,#232327,#171719);
-  border:1px solid #000;border-radius:var(--r);font-size:13px;
-  box-shadow:inset 0 1px 0 var(--lit),0 18px 48px rgba(0,0,0,.75)}
+.menu{position:fixed;z-index:60;min-width:196px;max-height:calc(100vh - 24px);
+  overflow-y:auto;padding:6px;
+  background:var(--verre2);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  border:1px solid var(--arete);border-radius:12px;font-size:13px;
+  box-shadow:0 22px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:monte .16s cubic-bezier(.2,.8,.2,1)}
 .menu .hd{padding:7px 10px 8px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--dim);display:flex;justify-content:space-between;gap:10px}
 .menu .hd span{font-family:var(--mono);color:var(--brass);letter-spacing:.04em;
@@ -367,17 +394,21 @@ button{background:none;border:0;cursor:pointer}
 
 /* ── Boîte de dialogue ────────────────────────── */
 .veil{position:fixed;inset:0;z-index:80;display:grid;place-items:center;
-  background:rgba(8,5,3,.72);backdrop-filter:blur(3px);padding:20px}
+  background:rgba(6,5,4,.52);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  padding:20px;animation:fondu .16s ease-out}
 /* Hauteur bornée : sans elle, une fiche longue pousse les boutons hors
    de l'écran, sans aucun moyen de les atteindre. L'en-tête et le pied
    restent en place, seul le contenu défile. */
-.dlg{width:min(470px,100%);max-height:calc(100dvh - 40px);
+.dlg{width:min(486px,100%);max-height:calc(100dvh - 44px);
   display:flex;flex-direction:column;
-  border:1px solid #000;border-radius:var(--r);overflow:hidden;
-  background:var(--grain),linear-gradient(180deg,#1E1E21,#141416);
-  box-shadow:inset 0 1px 0 var(--lit),0 28px 80px rgba(0,0,0,.85)}
-.dlg h3{flex:0 0 auto;margin:0;padding:15px 18px 12px;font-family:var(--disp);font-weight:400;
-  font-size:16px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);
+  border:1px solid var(--arete);border-radius:18px;overflow:hidden;
+  background:rgba(21,21,25,.88);
+  -webkit-backdrop-filter:var(--flou);backdrop-filter:var(--flou);
+  box-shadow:0 34px 90px rgba(0,0,0,.66),inset 0 1px 0 rgba(255,255,255,.09);
+  animation:monte .22s cubic-bezier(.2,.8,.2,1)}
+.dlg h3{flex:0 0 auto;margin:0;padding:17px 20px 13px;font-family:var(--disp);font-weight:600;
+  font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
   border-bottom:1px solid #000;box-shadow:0 1px 0 rgba(255,255,255,.04)}
 .dlg .bd{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;
   padding:15px 17px;display:flex;flex-direction:column;gap:11px}
@@ -504,6 +535,19 @@ button{background:none;border:0;cursor:pointer}
 .qres .wrow[data-sel="1"]{background:var(--brassg);box-shadow:inset 2px 0 0 var(--brass)}
 .qhint{margin-right:auto;align-self:center;font-size:11px;color:var(--faint)}
 
+/* ── Mouvement ────────────────────────────────── */
+/* Rien ne surgit : tout monte d'un cran en s'ouvrant. */
+@keyframes monte{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+@keyframes fondu{from{opacity:0}to{opacity:1}}
+
+.btn,.tool,.row,.wrow,.f,.hud button,.maps button,.menu .it,.curcol,.gdot,.lk{
+  transition:background var(--doux),color var(--doux),border-color var(--doux),
+             box-shadow var(--doux),transform var(--doux),opacity var(--doux)}
+.btn:hover,.hud button:hover{transform:translateY(-1px)}
+.btn:active,.hud button:active{transform:translateY(0)}
+.tool:hover{transform:scale(1.06)}
+.wrow:hover,.row:hover{transform:translateX(2px)}
+
 /* ── Toast ────────────────────────────────────── */
 .toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;
   display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none}
@@ -519,28 +563,32 @@ button{background:none;border:0;cursor:pointer}
 /* La barre de titre est pleine : quand la fenêtre se resserre elle se
    déleste par paliers, du plus décoratif au plus utile, plutôt que de
    rogner le titre en silence. Seuils mesurés, compteur à deux chiffres. */
-@media (max-width:1565px){ .brand .sub{display:none} }
-@media (max-width:1470px){
+@media (max-width:1660px){ .brand .sub{display:none} }
+@media (max-width:1550px){
   .bar .lb2,.bar .lb{display:none}
   .bar{gap:12px}
 }
-@media (max-width:1280px){ .bar .chip .tt,.who label{display:none} }
-@media (max-width:1180px){
+@media (max-width:1330px){ .bar .chip .tt,.who label{display:none} }
+@media (max-width:1200px){
   .brand h1{font-size:17px}
   .bar{gap:9px;padding:0 10px}
 }
-@media (max-width:1030px){
-  /* Passé ce seuil, la barre prend deux rangées : rien n'est tronqué. */
-  .bar{height:auto;flex:0 0 auto;flex-wrap:wrap;padding:8px 10px;gap:8px}
+@media (max-width:1080px){
+  /* Passé ce seuil, la barre prend deux rangées : rien n'est tronqué.
+     Le registre descend d'autant. */
+  .bar{height:auto;flex-wrap:wrap;padding:8px 10px;gap:8px}
+  .panel{top:112px}
 }
 @media (max-width:900px){
-  .panel{position:absolute;right:0;top:0;bottom:0;z-index:20;flex-basis:264px;
-    box-shadow:-14px 0 40px rgba(0,0,0,.6)}
+  .panel{width:272px}
   .brand .sub{display:none}
   .who input{width:96px}
 }
 @media (max-width:640px){
-  .bar{height:auto;flex:0 0 auto;padding:8px 10px;flex-wrap:wrap;gap:8px}
+  .bar{height:auto;padding:8px 10px;flex-wrap:wrap;gap:8px}
+  .tools{left:8px}
+  .hud{left:8px;bottom:8px}
+  .panel{right:8px;bottom:8px;width:calc(100% - 16px)}
   .who label{display:none}
   .tools{flex-basis:48px}
   .tool{width:38px;height:38px;flex-basis:38px}
